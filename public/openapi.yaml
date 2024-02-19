@@ -54,7 +54,7 @@ paths:
                   guid:
                     type: string
                     description: GUID of the posted document
-                    example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+                    example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
                 required:
                   - guid
           headers:
@@ -79,7 +79,7 @@ paths:
           schema:
             type: string
           required: true
-          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+          example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
         - name: If-Modified-Since
           in: header
           required: false
@@ -130,7 +130,7 @@ paths:
           schema:
             type: string
           required: true
-          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+          example: aedf97b4-ee27-47bc-97e2-5164ed96a92a
       responses:
         400:
           description: Bad request
@@ -155,7 +155,7 @@ paths:
           schema:
             type: string
           required: true
-          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+          example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
       responses:
         400:
           description: Bad request
@@ -203,7 +203,7 @@ paths:
           schema:
             type: string
           required: true
-          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+          example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
       requestBody:
         content:
           "application/json":
@@ -242,7 +242,7 @@ paths:
           schema:
             type: string
           required: true
-          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+          example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
         - name: returnSignedDocument
           in: query
           schema:
