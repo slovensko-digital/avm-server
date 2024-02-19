@@ -5,7 +5,7 @@ class Api::V1::DocumentsController < ApplicationController
 
   # GET /documents/1
   def show
-    @signers = @document.signers
+    @signers = @document.signers(@key)
   end
 
   # POST /documents
@@ -20,13 +20,13 @@ class Api::V1::DocumentsController < ApplicationController
 
   # POST /documents/1/visualization
   def visualization
-    @visualization = @document.visualization
+    @visualization = @document.visualization(@key)
   end
 
   # POST /documents/1/datatosign
   def datatosign
     @signing_certificate = datatosign_params.require(:signingCertificate)
-    @result = @document.datatosign(@signing_certificate)
+    @result = @document.datatosign(@key, @signing_certificate)
   end
 
   # POST /documents/1/sign
@@ -34,7 +34,7 @@ class Api::V1::DocumentsController < ApplicationController
     @signed_by = "SERIALNUMBER=PNOSK-1234567890, C=SK, L=Bratislava, SURNAME=Smith, GIVENNAME=John, CN=John Smith"
     @issued_by = "CN=SVK eID ACA2, O=Disig a.s., OID.2.5.4.97=NTRSK-12345678, L=Bratislava, C=SK"
 
-    unless @document.sign(sign_params)
+    unless @document.sign(@key, sign_params)
       render json: @document.errors, status: :unprocessable_entity
     end
   end

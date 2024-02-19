@@ -5,7 +5,7 @@ class Document < ApplicationRecord
     encrypted_content.download
   end
 
-  def signers
+  def signers(key)
     [
       {
         "signedBy": "SERIALNUMBER=PNOSK-1234567890, C=SK, L=Bratislava, SURNAME=Smith, GIVENNAME=John, CN=John Smith",
@@ -14,22 +14,22 @@ class Document < ApplicationRecord
     ]
   end
 
-  def visualization
+  def visualization(key)
     {
       filename: encrypted_content.filename,
-      mimetype: 'text/plain',
-      content: 'ZXhhbXBsZSBzdHJpbmcgaW4gYmFzZTY0Cg==',
+      mimetype: encrypted_content.content_type,
+      content: decrypted_content(key),
     }
   end
 
-  def datatosign(signing_certificate)
+  def datatosign(key, signing_certificate)
     {
       signing_time: 1707900119123,
       datatosign: 'MYIBBDAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMC8GCSqGSIb3DQEJBDEiBCBi60eUI/NmObmcTwDsze2zBooVmgpZh8puJa4OhNpEejCBtgYLKoZIhvcNAQkQAi8xgaYwgaMwgaAwgZ0EIJz+4gnulo5kn6oovtKTUeONdQyNjCUKINcKqCmvL7JwMHkwa6RpMGcxCzAJBgNVBAYTAlNLMRMwEQYDVQQHEwpCcmF0aXNsYXZhMRcwFQYDVQRhEw5OVFJTSy0zNTk3NTk0NjETMBEGA1UEChMKRGlzaWcgYS5zLjEVMBMGA1UEAxMMU1ZLIGVJRCBBQ0EyAgoG/pWsnJ0ABRcV'
     }
   end
 
-  def sign(params)
+  def sign(key, params)
     true
   end
 end
