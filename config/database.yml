@@ -18,5 +18,5 @@ test:
   database: autogram_server_test
 
 production:
+  <<: *default
   url: <%= ENV['DATABASE_URL'] %>
-  pool: 50
