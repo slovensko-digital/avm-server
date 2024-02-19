@@ -1,0 +1,468 @@
+openapi: '3.0.2'
+
+info:
+  title: AVM Server
+  version: '0.2.0'
+
+servers:
+  - url: https://autogram.slovensko.digital/api/v1
+  - url: http://localhost:3000/api/v1
+
+tags:
+  - name: Mobile2App
+  - name: Desktop2App - Extension
+  - name: Desktop2App - Client
+
+security:
+  - Header: []
+  - Query: []
+  - Body: []
+
+paths:
+  /documents:
+    post:
+      tags:
+        - Mobile2App
+        - Desktop2App - Extension
+      description: Client app posts document along with some parameters to Server. Server encrypts the document using the provided EncryptionKey and stores it on a disk.
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/DocumentPostRequestBody"
+      responses:
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                  error:
+                    type: string
+        401:
+          description: EncryptionKey not provided
+        200:
+          description: Server stored the data and returned GUID so the client can further access the data.
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  guid:
+                    type: string
+                    description: GUID of the posted document
+                    example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+                required:
+                  - guid
+          headers:
+            Last-Modified:
+              schema:
+                type: string
+                pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
+                example: 'Tue, 15 Oct 2019 12:45:26 GMT'
+              description: Datetime of the last-modified attribute of the uploaded file. Useful for polling with the GET document request.
+
+  /documents/{guid}:
+    get:
+      tags:
+        - Desktop2App - Extension
+      description: |
+        External system requests signed document at the end of the process.
+
+        This endpoint is also designed for polling with the `If-Modified-Since` header.
+      parameters:
+        - name: guid
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+        - name: If-Modified-Since
+          in: header
+          required: false
+          schema:
+            type: string
+            pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
+            example: 'Tue, 15 Oct 2019 12:45:26 GMT'
+      responses:
+        400:
+          description: Bad request
+        401:
+          description: EncryptionKey not provided
+        403:
+          description: EncryptionKey mismatch
+        404:
+          description: Not found
+        304:
+          description: Requested document has not been modified since `If-Modified-Since` header
+          headers:
+            Last-Modified:
+              schema:
+                type: string
+                pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
+                example: 'Tue, 15 Oct 2019 12:45:26 GMT'
+              description: Datetime of the last-modified attribute of the requeste document.
+        200:
+          description: Requested document with an array of its signers
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/GetDocumentResponse"
+          headers:
+            Last-Modified:
+              schema:
+                type: string
+                pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
+                example: 'Tue, 15 Oct 2019 12:45:26 GMT'
+              description: Datetime of the last-modified attribute of the requeste document.
+
+    delete:
+      description: |
+        External system requests signed document at the end of the process.
+
+        This endpoint is also designed for polling with the `If-Modified-Since` header.
+      parameters:
+        - name: guid
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+      responses:
+        400:
+          description: Bad request
+        401:
+          description: EncryptionKey not provided
+        403:
+          description: EncryptionKey mismatch
+        404:
+          description: Not found
+        204:
+          description: Document deleted
+
+  /documents/{guid}/visualization:
+    get:
+      tags:
+        - Desktop2App - Client
+        - Mobile2App
+      description: Client app requests encrypted document to visualize it.
+      parameters:
+        - name: guid
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+      responses:
+        400:
+          description: Bad request
+        401:
+          description: EncryptionKey not provided
+        403:
+          description: EncryptionKey mismatch
+        404:
+          description: Not found
+        200:
+          description: OK
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  mimeType:
+                    type: string
+                    enum:
+                      - "application/pdf"
+                      - "text/html"
+                      - "text/plain"
+                    example: "application/pdf"
+                  filename:
+                    type: string
+                    description: Name of the document
+                    example: sample_document.pdf
+                  content:
+                    type: string
+                    description: Base64 encoded contentto be displayed
+                    example: ZXhhbXBsZSBzdHJpbmcgaW4gYmFzZTY0Cg==
+                required:
+                  - mimeType
+                  - content
+
+  /documents/{guid}/datatosign:
+    post:
+      tags:
+        - Mobile2App
+        - Desktop2App - Client
+      description: Client app posts signing certificate to the server. Server decrypts the encrypted document from disk, computes DataToSign and returns it along exact signing time in milliseconds. The whole response object is later required for POST /sign request.
+      parameters:
+        - name: guid
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                signingCertificate:
+                  $ref: "#/components/schemas/SigningCertificate"
+              required:
+                - signingCertificate
+      responses:
+        400:
+          description: Bad request
+        401:
+          description: EncryptionKey not provided
+        403:
+          description: EncryptionKey mismatch
+        404:
+          description: Not found
+        200:
+          description: Computed DataToSign and exact SigningTime.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/DataToSignStructure"
+
+  /documents/{guid}/sign:
+    post:
+      tags:
+        - Mobile2App
+        - Desktop2App - Client
+      description: Create signed document using the SignedData obtained from client.
+      parameters:
+        - name: guid
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 4fb8b67e-05fb-480c-a41a-d05bfd9faaa9
+        - name: returnSignedDocument
+          in: query
+          schema:
+            type: boolean
+            description: Inidcation whether to return signed document in the response. Default to true. Is useful when signing document for external system.
+            default: true
+          required: false
+
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/SignRequestBody"
+      responses:
+        400:
+          description: Bad request
+        401:
+          description: EncryptionKey not provided
+        403:
+          description: EncryptionKey mismatch
+        404:
+          description: Not found
+        422:
+          description: Unprocessable entity - possibly dataToSign mismatch.
+        204:
+          description: 'When `"returnSignedDocument": false` Document was sucessfuly signed and can be obtained via GET signed request. Empty response.'
+        200:
+          description: Document was sucessfuly signed, can be obtained via GET signed request, and is also returned in the response.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/SignDocumentResponse"
+
+components:
+  schemas:
+    DocumentPostRequestBody:
+      type: object
+      properties:
+        document:
+          $ref: "#/components/schemas/Document"
+        parameters:
+          $ref: "#/components/schemas/SigningParameters"
+        payloadMimeType:
+          type: string
+          example: application/pdf;base64
+          description: |
+            MIME type for document content and signature parameters XSLT transformation and XSD schema.
+            Binary files should be encoded using base64, e.g., `application/pdf;base64`.
+            Text formats like XML can be optionally encoded using base64 or supplied as plain text.
+      required:
+        - document
+        - parameters
+        - payloadMimeType
+
+    SigningCertificate:
+      type: string
+      description: Base64 encoded x509 certificate of the signing entity
+      example: MIIDZjCCAk6gAwIBAgIEZVH4UzANBgkqhkiG9w0BAQsFADB1MQswCQYDVQQGEwJTSzETMBEGA1UECAwKQnJhdGlzbGF2YTETMBEGA1UEBwwKQnJhdGlzbGF2YTERMA8GA1UECgwIQXV0b2dyYW0xETAPBgNVBAsMCEF1dG9ncmFtMRYwFAYDVQQDDA1BdXRvZ3JhbSBUZXN0MB4XDTIzMTExMzEwMjAwM1oXDTI0MTExMjEwMjAwM1owdTELMAkGA1UEBhMCU0sxEzARBgNVBAgMCkJyYXRpc2xhdmExEzARBgNVBAcMCkJyYXRpc2xhdmExETAPBgNVBAoMCEF1dG9ncmFtMREwDwYDVQQLDAhBdXRvZ3JhbTEWMBQGA1UEAwwNQXV0b2dyYW0gVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAN8d3eH2xRJeesoNmDIguuHBv5hhqRPsN4LGjGmhQ9NrBAN1DKW31wh0+Tfdx58GNztgLVpElpQB7/yBprqNAKADYXs+onkUbg4X798lAbiaaMvQzY9dVXhFhb1I2ZEGurNhZqP01wbjRso4O0UJ2wSIw5r/sZZji17VhdhquVzDP+RzJeU36CRohE7T1caG6Q1/Tl5arSvEcJMz/8YUYjudB0Bbj+1Z06JTWK+FW/7zJmPNsRGSnF/TLIMDvIabMDoUswP7wBPbnoWy+B/tTdKnl818OKilRlZf5mjmINvZ8I3eXl0WRA/UlURuAp3PprcZnBdejCBHNomgyML8G9sCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAKD+0fM+cRVkDOoTU9qyESQ6tma8cchjV8dVvTbvHmLTZYCBxKUTugZOz9tENd+9p+1uGc6opcCrmiHyq0oG8D8Y9FLzHFKgslod4+IHUOON/pes+r6b4/0Z4+rjuZ5JrDyeIWsGtwVQaM6BeC1afr/H7uT9kr8Eu1ElNw/SAWBmQZiz3e40XF2ijPd9b43p05O0dqBF0q383bD2K15QJofzCM+0I0OqhJwsWvHlupoPlcF4gRqFV7MUQ5QHXOryUCICp8h2O8988JFvXxaJKGMCU9Zfick3KJ3UsdJ+0jbCL4pOep75abBD6pcdD9qlUF4seiiQiceMbmmeTQfqTgg==
+
+    DataToSign:
+      type: string
+      description: Base64 encoded DataToSign object
+      example: MYIBBDAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMC8GCSqGSIb3DQEJBDEiBCBi60eUI/NmObmcTwDsze2zBooVmgpZh8puJa4OhNpEejCBtgYLKoZIhvcNAQkQAi8xgaYwgaMwgaAwgZ0EIJz+4gnulo5kn6oovtKTUeONdQyNjCUKINcKqCmvL7JwMHkwa6RpMGcxCzAJBgNVBAYTAlNLMRMwEQYDVQQHEwpCcmF0aXNsYXZhMRcwFQYDVQRhEw5OVFJTSy0zNTk3NTk0NjETMBEGA1UEChMKRGlzaWcgYS5zLjEVMBMGA1UEAxMMU1ZLIGVJRCBBQ0EyAgoG/pWsnJ0ABRcV
+
+    SigningTime:
+      type: integer
+      description: Epoch timestamp in milliseconds of the signing time
+      example: 1707900119123
+
+    DataToSignStructure:
+      type: object
+      properties:
+        dataToSign:
+          $ref: "#/components/schemas/DataToSign"
+        signingTime:
+          $ref: "#/components/schemas/SigningTime"
+        signingCertificate:
+          $ref: "#/components/schemas/SigningCertificate"
+      required:
+        - dataToSign
+        - signingTime
+        - signingCertificate
+
+    SignRequestBody:
+      type: object
+      properties:
+        signedData:
+          type: string
+          description: DataToSign signed by SigningCertificate
+          example: eP49QHaKINDTo8/56O6ZlDVKGn3FYq+fRqnCMpQExYVIWrHeZkGoq2FxRRThlEKkOBUS5+8+RHZzOf4yXAFfKjNmNdMnyisEUToQqYSQavec3KZPaDgcvNdZ4MC+tRMcwTod75Zu87UleyOLe3Xoqxjteq7MvqVRCc/C1sX2yVab3yIOSgoZILpHgTl4EqTOonVJts4XBnEzuZKwXS10KyumjoSE41EqTrM/mwy95ebdrRZqNI5EWJIzor8jC5AMsmsBWvxeBKkfepFiWHMtTy1iYkJMZ6vbttlEdTSt9OqSszyw7Z7fP7Tl55hkKL4fiiXA9DOzyibn4E1XD1tRPRaqulxsdIrTbnMgeXlteXG3XXK76+OgqnRxb2hxPx6H8Qiig0GhK1Qn2H26JaNrpFjsqT9n7md9PzLuhmB4MI7HxOUCdAxmRt4cxNkJdHB2NsDBVfQ7FBNxxi35j93D/GD2KpaG77Iq/5ZfBegvQn28N2oGh/xsEqc3hoc6o23E
+        dataToSignStructure:
+          $ref: "#/components/schemas/DataToSignStructure"
+          description: The original DataToSignStructre to compare it with DataToSignStructure generated in this request to verify consistency
+      required:
+        - signingCertificate
+        - signingTime
+        - signedData
+        - dataToSignStructure
+
+    SignDocumentResponse:
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Filename of the signed document
+          example: sample_document.pdf
+        mimeType:
+          type: string
+          description: mimeType of the signed document
+          enum:
+            - "application/pdf"
+            - "application/vnd.etsi.asic-e+zip"
+            - "application/vnd.etsi.asic-s+zip"
+        content:
+          type: string
+          description: Base64 encrypted content of the signed document
+          example: ZXhhbXBsZSBvZiBzaWduZWQgZG9jdW1lbnQgaW4gYmFzZTY0Cg==
+        signedBy:
+          type: string
+          example: "SERIALNUMBER=PNOSK-1234567890, C=SK, L=Bratislava, SURNAME=Smith, GIVENNAME=John, CN=John Smith"
+          description: "Distinguished name of the certificate used/attempting to sign the document."
+        issuedBy:
+          type: string
+          example: "CN=SVK eID ACA2, O=Disig a.s., OID.2.5.4.97=NTRSK-12345678, L=Bratislava, C=SK"
+          description: "Distinguished name of the issuer of the certificate used/attempting to sign the document."
+      required:
+        - filename
+        - mimeType
+        - content
+        - signedBy
+        - issuedBy
+
+    GetDocumentResponse:
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Filename of the signed document
+          example: sample_document.pdf
+        mimeType:
+          type: string
+          description: mimeType of the signed document
+          enum:
+            - "application/pdf"
+            - "application/vnd.etsi.asic-e+zip"
+            - "application/vnd.etsi.asic-s+zip"
+        content:
+          type: string
+          description: Base64 encrypted content of the signed document
+          example: ZXhhbXBsZSBvZiBzaWduZWQgZG9jdW1lbnQgaW4gYmFzZTY0Cg==
+        signers:
+          type: array
+          description: Array of all signers of the documents
+          items:
+            type: object
+            properties:
+              signedBy:
+                type: string
+                example: "SERIALNUMBER=PNOSK-1234567890, C=SK, L=Bratislava, SURNAME=Smith, GIVENNAME=John, CN=John Smith"
+                description: "Distinguished name of the certificate used/attempting to sign the document."
+              issuedBy:
+                type: string
+                example: "CN=SVK eID ACA2, O=Disig a.s., OID.2.5.4.97=NTRSK-12345678, L=Bratislava, C=SK"
+                description: "Distinguished name of the issuer of the certificate used/attempting to sign the document."
+      required:
+        - filename
+        - mimeType
+        - content
+        - signedBy
+        - issuedBy
+
+    Document:
+      description: JSON object that is encrypted for
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Filename of the document
+          example: sample_document.pdf
+        content:
+          type: string
+          description: Base64 encrypted content of the document
+          example: ZXhhbXBsZSBzdHJpbmcgaW4gYmFzZTY0Cg==
+      required:
+        - content
+
+    SigningParameters:
+      type: object
+      description: Signing parameters same as in the Autogram API
+      properties:
+        level:
+          type: string
+          description: Signature level.
+          example: PAdES_BASELINE_B
+          enum:
+            - PAdES_BASELINE_B
+            - PAdES_BASELINE_T
+            - XAdES_BASELINE_B
+            - XAdES_BASELINE_T
+            - CAdES_BASELINE_B
+            - CAdES_BASELINE_T
+        container:
+          type: string
+          description: Type of Advanced Signature Container. Defaults to null - no container.
+          example:
+          enum:
+            - ASiC-E
+            - ASiC-S
+      required:
+        - level
+
+  securitySchemes:
+    Header:
+      type: apiKey
+      in: header
+      name: X-Encryption-Key
+      description: AES256 encryption key in hexadecimal form that is used to encrypt and decrypt signing doucment.
+
+    Parameter:
+      type: apiKey
+      in: query
+      name: encryptionKey
+      description: AES256 encryption key in hexadecimal form that is used to encrypt and decrypt signing doucment.
