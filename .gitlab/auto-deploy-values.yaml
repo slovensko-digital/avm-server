@@ -1,0 +1,21 @@
+timeout: 120
+service:
+  externalPort: 3000
+  internalPort: 3000
+image:
+  secrets:
+  - name: skdigital-bonet-registry
+application.migrateCommand: ["bundle", "exec", "rails", "db:migrate"]
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 256m
+persistence:
+  enabled: true
+  volumes:
+  - name: autogram-server-storage
+    mount:
+      path: /app/storage
+    claim:
+      accessMode: ReadWriteMany
+      size: 1Gi
+      storageClass: nfs-client
