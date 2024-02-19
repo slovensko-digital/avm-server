@@ -1,6 +1,7 @@
 require_relative "boot"
 
 require "rails/all"
+require "active_storage/engine"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -28,5 +29,18 @@ module AutogramServer
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    config.middleware.use Rack::Cors do
+      allow do
+        origins '*'
+        resource '*',
+                 headers: :any,
+                 expose: %w(access-token expiry token-type uid client),
+                 methods: %i(get post options put delete)
+
+      end
+    end
+
+    Rails.application.config.generators { |g| g.orm :active_record, primary_key_type: :uuid }
   end
 end
