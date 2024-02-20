@@ -15,8 +15,7 @@ tags:
 
 security:
   - Header: []
-  - Query: []
-  - Body: []
+  - Parameter: []
 
 paths:
   /documents:
@@ -30,6 +29,14 @@ paths:
           "application/json":
             schema:
               $ref: "#/components/schemas/DocumentPostRequestBody"
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+            default: application/json
+          required: true
+          allowEmptyValue: false
       responses:
         400:
           description: Bad request
@@ -87,6 +94,13 @@ paths:
             type: string
             pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
             example: 'Tue, 15 Oct 2019 12:45:26 GMT'
+        - name: Accept
+          in: header
+          schema:
+            type: string
+            default: application/json
+          required: true
+          allowEmptyValue: false
       responses:
         400:
           description: Bad request
@@ -156,6 +170,13 @@ paths:
             type: string
           required: true
           example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
+        - name: Accept
+          in: header
+          schema:
+            type: string
+            default: application/json
+          required: true
+          allowEmptyValue: false
       responses:
         400:
           description: Bad request
@@ -204,6 +225,13 @@ paths:
             type: string
           required: true
           example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
+        - name: Accept
+          in: header
+          schema:
+            type: string
+            default: application/json
+          required: true
+          allowEmptyValue: false
       requestBody:
         content:
           "application/json":
@@ -250,7 +278,13 @@ paths:
             description: Inidcation whether to return signed document in the response. Default to true. Is useful when signing document for external system.
             default: true
           required: false
-
+        - name: Accept
+          in: header
+          schema:
+            type: string
+            default: application/json
+          required: true
+          allowEmptyValue: false
       requestBody:
         content:
           "application/json":
