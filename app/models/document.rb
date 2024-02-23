@@ -1,11 +1,30 @@
 class Document < ApplicationRecord
   has_one_attached :encrypted_content
 
-  def decrypted_content(key)
-    encrypted_content.download
+  def decrypt_content(key)
+    @decrypted_content = encrypted_content.download
   end
 
-  def signers(key)
+  def decrypted_content
+    Base64.strict_encode64(@decrypted_content)
+  end
+
+  def decrypted_content_mimetype_b64
+    encrypted_content.content_type + ';base64'
+  end
+
+  def encrypt_file(key, filename, mimetype, content)
+    if mimetype.include?('base64')
+      content = Base64.decode64(content)
+    end
+    encrypted_content.attach(filename: filename, content_type: mimetype, io: StringIO.new(content))
+  end
+
+  def validate_parameters(content)
+    avm_service.validate_parameters(self, content)
+  end
+
+  def signers
     [
       {
         "signedBy": "SERIALNUMBER=PNOSK-1234567890, C=SK, L=Bratislava, SURNAME=Smith, GIVENNAME=John, CN=John Smith",
@@ -14,22 +33,28 @@ class Document < ApplicationRecord
     ]
   end
 
-  def visualization(key)
-    {
-      filename: encrypted_content.filename,
-      mimetype: encrypted_content.content_type,
-      content: decrypted_content(key),
-    }
+  def visualization
+    avm_service.visualization(self)
   end
 
-  def datatosign(key, signing_certificate)
-    {
-      signing_time: 1707900119123,
-      datatosign: 'MYIBBDAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMC8GCSqGSIb3DQEJBDEiBCBi60eUI/NmObmcTwDsze2zBooVmgpZh8puJa4OhNpEejCBtgYLKoZIhvcNAQkQAi8xgaYwgaMwgaAwgZ0EIJz+4gnulo5kn6oovtKTUeONdQyNjCUKINcKqCmvL7JwMHkwa6RpMGcxCzAJBgNVBAYTAlNLMRMwEQYDVQQHEwpCcmF0aXNsYXZhMRcwFQYDVQRhEw5OVFJTSy0zNTk3NTk0NjETMBEGA1UEChMKRGlzaWcgYS5zLjEVMBMGA1UEAxMMU1ZLIGVJRCBBQ0EyAgoG/pWsnJ0ABRcV'
-    }
+  def datatosign(signing_certificate)
+    avm_service.datatosign(self, signing_certificate)
   end
 
-  def sign(key, params)
-    true
+  def sign(key, data_to_sign, signed_data)
+    response = avm_service.sign(self, data_to_sign, signed_data)
+
+    puts response
+
+    document = response['documentResponse']
+    encrypt_file(key, document.dig('filename'), document['mimeType'], document['content'])
+
+    response['signer']
+  end
+
+  private
+
+  def avm_service
+    Avm::Environment.avm_api
   end
 end

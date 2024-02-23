@@ -1,3 +1,3 @@
-json.dataToSign @result[:datatosign]
-json.signingTime @result[:signing_time]
+json.dataToSign @result['dataToSign']
+json.signingTime @result['signingTime']
 json.signingCertificate @signing_certificate

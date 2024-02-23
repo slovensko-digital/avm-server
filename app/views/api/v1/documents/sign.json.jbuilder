@@ -1,5 +1,5 @@
 json.filename @document.encrypted_content.filename
-json.mimeType @document.encrypted_content.content_type
-json.content @decrypted_content
-json.signedBy @signed_by
-json.issuedBy @issued_by
+json.mimeType @document.decrypted_content_mimetype_b64
+json.content @document.decrypted_content
+json.signedBy @signer['signedBy']
+json.issuedBy @signer['issuedBy']

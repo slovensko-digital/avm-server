@@ -1,4 +1,4 @@
 json.filename @document.encrypted_content.filename
-json.mimeType @document.encrypted_content.content_type
-json.content @decrypted_content
+json.mimeType @document.decrypted_content_mimetype_b64
+json.content @document.decrypted_content
 json.signers @signers

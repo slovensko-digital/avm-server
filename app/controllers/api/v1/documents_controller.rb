@@ -1,40 +1,46 @@
 class Api::V1::DocumentsController < ApplicationController
+  rescue_from AvmServiceBadRequestError do |e|
+    render json: JSON.parse(e.message), status: 400
+  end
+
+  rescue_from AvmServiceInternalError do |e|
+    render json: JSON.parse(e.message), status: 500
+  end
+
   before_action :set_document, only: %i[ show datatosign sign visualization destroy ]
   before_action :set_key, only: %i[ show create datatosign sign visualization ]
   before_action :decrypt_document_content, only: %i[ show sign datatosign visualization destroy]
 
   # GET /documents/1
   def show
-    @signers = @document.signers(@key)
+    @signers = @document.signers
   end
 
   # POST /documents
   def create
     p = document_params
-    d = p.require(:document)
     @document = Document.new(parameters: p[:parameters])
-    @document.encrypted_content.attach(filename: d[:filename] || "document", content_type: p.require(:payloadMimeType), io: StringIO.new(d.require(:content)))
+    @document.encrypt_file(@key, p[:document][:filename], p[:payloadMimeType], p[:document][:content])
+    @document.validate_parameters(p[:document][:content])
 
     render json: @document.errors, status: :unprocessable_entity unless @document.save
   end
 
   # POST /documents/1/visualization
   def visualization
-    @visualization = @document.visualization(@key)
+    @visualization = @document.visualization
   end
 
   # POST /documents/1/datatosign
   def datatosign
     @signing_certificate = datatosign_params.require(:signingCertificate)
-    @result = @document.datatosign(@key, @signing_certificate)
+    @result = @document.datatosign(@signing_certificate)
   end
 
   # POST /documents/1/sign
   def sign
-    @signed_by = "SERIALNUMBER=PNOSK-1234567890, C=SK, L=Bratislava, SURNAME=Smith, GIVENNAME=John, CN=John Smith"
-    @issued_by = "CN=SVK eID ACA2, O=Disig a.s., OID.2.5.4.97=NTRSK-12345678, L=Bratislava, C=SK"
-
-    unless @document.sign(@key, sign_params)
+    @signer = @document.sign(@key, sign_params[:dataToSignStructure], sign_params[:signedData])
+    unless @signer
       render json: @document.errors, status: :unprocessable_entity
     end
   end
@@ -55,10 +61,15 @@ class Api::V1::DocumentsController < ApplicationController
     end
 
     def decrypt_document_content
-      @decrypted_content = @document.decrypted_content(@key)
+      @document.decrypt_content(@key)
     end
 
     def document_params
+      params.require(:parameters)
+      d = params.require(:document)
+      d.require(:content)
+      d.require(:filename)
+      params.require(:payloadMimeType)
       params.permit(:encryptionKey, :payloadMimeType, :key, :document => [:filename, :content], :parameters => [:level, :container])
     end
 

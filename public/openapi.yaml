@@ -301,10 +301,11 @@ paths:
           description: Not found
         422:
           description: Unprocessable entity - possibly dataToSign mismatch.
-        204:
-          description: 'When `"returnSignedDocument": false` Document was sucessfuly signed and can be obtained via GET signed request. Empty response.'
         200:
-          description: Document was sucessfuly signed, can be obtained via GET signed request, and is also returned in the response.
+          description: |
+            Document was sucessfuly signed, can be obtained via GET signed request, and is also returned in the response.
+
+            When `"returnSignedDocument": false` Document.Content is empty.
           content:
             "application/json":
               schema:
@@ -462,6 +463,7 @@ components:
           example: ZXhhbXBsZSBzdHJpbmcgaW4gYmFzZTY0Cg==
       required:
         - content
+        - filename
 
     SigningParameters:
       type: object
