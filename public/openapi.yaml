@@ -388,9 +388,9 @@ components:
           type: string
           description: mimeType of the signed document
           enum:
-            - "application/pdf"
-            - "application/vnd.etsi.asic-e+zip"
-            - "application/vnd.etsi.asic-s+zip"
+            - "application/pdf;base64"
+            - "application/vnd.etsi.asic-e+zip;base64"
+            - "application/vnd.etsi.asic-s+zip;base64"
         content:
           type: string
           description: Base64 encrypted content of the signed document
@@ -421,9 +421,9 @@ components:
           type: string
           description: mimeType of the signed document
           enum:
-            - "application/pdf"
-            - "application/vnd.etsi.asic-e+zip"
-            - "application/vnd.etsi.asic-s+zip"
+            - "application/pdf;base64"
+            - "application/vnd.etsi.asic-e+zip;base64"
+            - "application/vnd.etsi.asic-s+zip;base64"
         content:
           type: string
           description: Base64 encrypted content of the signed document
