@@ -44,8 +44,6 @@ class Document < ApplicationRecord
   def sign(key, data_to_sign, signed_data)
     response = avm_service.sign(self, data_to_sign, signed_data)
 
-    puts response
-
     document = response['documentResponse']
     encrypt_file(key, document.dig('filename'), document['mimeType'], document['content'])
 
