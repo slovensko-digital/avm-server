@@ -1,12 +1,4 @@
 class Api::V1::DocumentsController < ApplicationController
-  rescue_from AvmServiceBadRequestError do |e|
-    render json: JSON.parse(e.message), status: 400
-  end
-
-  rescue_from AvmServiceInternalError do |e|
-    render json: JSON.parse(e.message), status: 500
-  end
-
   before_action :set_document, only: %i[ show datatosign sign visualization destroy ]
   before_action :set_key, only: %i[ show create datatosign sign visualization ]
   before_action :decrypt_document_content, only: %i[ show sign datatosign visualization destroy]
@@ -33,6 +25,7 @@ class Api::V1::DocumentsController < ApplicationController
 
   # POST /documents/1/datatosign
   def datatosign
+    @document.set_add_timestamp if datatosign_params[:addTimestamp]
     @signing_certificate = datatosign_params.require(:signingCertificate)
     @result = @document.datatosign(@signing_certificate)
   end
@@ -40,9 +33,10 @@ class Api::V1::DocumentsController < ApplicationController
   # POST /documents/1/sign
   def sign
     @signer = @document.sign(@key, sign_params[:dataToSignStructure], sign_params[:signedData])
-    unless @signer
-      render json: @document.errors, status: :unprocessable_entity
-    end
+    render json: @document.errors, status: :unprocessable_entity unless @signer
+
+    @document = Document.find(params[:id])
+    decrypt_document_content
   end
 
   # DELETE /documents/1
@@ -57,7 +51,13 @@ class Api::V1::DocumentsController < ApplicationController
 
     def set_key
       @key = request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey]
-      raise ActionController::ParameterMissing.new('X-Encryption-Key') unless @key
+      raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MISSING", "Encryption key not provided.", "Encryption key must be provided either in X-Encryption-Key header or as encryptionKey query parameter.") unless @key
+      # TODO
+      # raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key invalid.", "Encryption key must be a 64 character long hexadecimal string.") unless validate_key(@key)
+    end
+
+    def validate_key(key)
+      key.length == 64 and !key[/\H/]
     end
 
     def decrypt_document_content
@@ -74,7 +74,7 @@ class Api::V1::DocumentsController < ApplicationController
     end
 
     def datatosign_params
-      params.permit(:encryptionKey, :id, :signingCertificate)
+      params.permit(:encryptionKey, :id, :signingCertificate, :addTimestamp)
     end
 
     def sign_params

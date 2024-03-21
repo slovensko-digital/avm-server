@@ -37,6 +37,11 @@ class Document < ApplicationRecord
     avm_service.visualization(self)
   end
 
+  def set_add_timestamp
+    parameters['level'] = parameters['level'].gsub(/BASELINE_B/, 'BASELINE_T')
+    save!
+  end
+
   def datatosign(signing_certificate)
     avm_service.datatosign(self, signing_certificate)
   end

@@ -38,32 +38,12 @@ paths:
           required: true
           allowEmptyValue: false
       responses:
-        400:
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: integer
-                  error:
-                    type: string
-        401:
-          description: EncryptionKey not provided
         200:
           description: Server stored the data and returned GUID so the client can further access the data.
           content:
             "application/json":
               schema:
-                type: object
-                properties:
-                  guid:
-                    type: string
-                    description: GUID of the posted document
-                    example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
-                required:
-                  - guid
+                $ref: "#/components/schemas/CreateDocumentResponseBody"
           headers:
             Last-Modified:
               schema:
@@ -71,6 +51,36 @@ paths:
                 pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
                 example: 'Tue, 15 Oct 2019 12:45:26 GMT'
               description: Datetime of the last-modified attribute of the uploaded file. Useful for polling with the GET document request.
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponseBody"
+        401:
+          description: EncryptionKey not provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyNotProvidedErrorResponseBody"
+        422:
+          description: Unprocessable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseBody"
+        500:
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalErrorResponseBody"
+        502:
+          description: Bad gateway - internal error on AVM microservice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
   /documents/{guid}:
     get:
@@ -79,7 +89,7 @@ paths:
       description: |
         External system requests signed document at the end of the process.
 
-        This endpoint is also designed for polling with the `If-Modified-Since` header.
+        This endpoint is also designed for polling with the `If-Modified-Since` header (`TODO`).
       parameters:
         - name: guid
           in: path
@@ -102,23 +112,6 @@ paths:
           required: true
           allowEmptyValue: false
       responses:
-        400:
-          description: Bad request
-        401:
-          description: EncryptionKey not provided
-        403:
-          description: EncryptionKey mismatch
-        404:
-          description: Not found
-        304:
-          description: Requested document has not been modified since `If-Modified-Since` header
-          headers:
-            Last-Modified:
-              schema:
-                type: string
-                pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
-                example: 'Tue, 15 Oct 2019 12:45:26 GMT'
-              description: Datetime of the last-modified attribute of the requeste document.
         200:
           description: Requested document with an array of its signers
           content:
@@ -131,7 +124,54 @@ paths:
                 type: string
                 pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
                 example: 'Tue, 15 Oct 2019 12:45:26 GMT'
+              description: "`TODO` Datetime of the last-modified attribute of the requeste document."
+        304:
+          description: Requested document has not been modified since `If-Modified-Since` header
+          headers:
+            Last-Modified:
+              schema:
+                type: string
+                pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
+                example: 'Tue, 15 Oct 2019 12:45:26 GMT'
               description: Datetime of the last-modified attribute of the requeste document.
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponseBody"
+        401:
+          description: EncryptionKey not provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyNotProvidedErrorResponseBody"
+        403:
+          description: EncryptionKey mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyMismatchErrorResponseBody"
+        404:
+          description: Not found
+        422:
+          description: Unprocessable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseBody"
+        500:
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalErrorResponseBody"
+        502:
+          description: Bad gateway - internal error on AVM microservice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
     delete:
       description: |
@@ -146,16 +186,46 @@ paths:
           required: true
           example: aedf97b4-ee27-47bc-97e2-5164ed96a92a
       responses:
-        400:
-          description: Bad request
-        401:
-          description: EncryptionKey not provided
-        403:
-          description: EncryptionKey mismatch
-        404:
-          description: Not found
         204:
           description: Document deleted
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponseBody"
+        401:
+          description: EncryptionKey not provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyNotProvidedErrorResponseBody"
+        403:
+          description: EncryptionKey mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyMismatchErrorResponseBody"
+        404:
+          description: Not found
+        422:
+          description: Unprocessable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseBody"
+        500:
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalErrorResponseBody"
+        502:
+          description: Bad gateway - internal error on AVM microservice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
   /documents/{guid}/visualization:
     get:
@@ -178,39 +248,50 @@ paths:
           required: true
           allowEmptyValue: false
       responses:
-        400:
-          description: Bad request
-        401:
-          description: EncryptionKey not provided
-        403:
-          description: EncryptionKey mismatch
-        404:
-          description: Not found
         200:
           description: OK
           content:
             "application/json":
               schema:
-                type: object
-                properties:
-                  mimeType:
-                    type: string
-                    enum:
-                      - "application/pdf"
-                      - "text/html"
-                      - "text/plain"
-                    example: "application/pdf"
-                  filename:
-                    type: string
-                    description: Name of the document
-                    example: sample_document.pdf
-                  content:
-                    type: string
-                    description: Base64 encoded contentto be displayed
-                    example: ZXhhbXBsZSBzdHJpbmcgaW4gYmFzZTY0Cg==
-                required:
-                  - mimeType
-                  - content
+                $ref: "#/components/schemas/VisualizationResponse"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponseBody"
+        401:
+          description: EncryptionKey not provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyNotProvidedErrorResponseBody"
+        403:
+          description: EncryptionKey mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyMismatchErrorResponseBody"
+        404:
+          description: Not found
+        422:
+          description: Unprocessable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseBody"
+        500:
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalErrorResponseBody"
+        502:
+          description: Bad gateway - internal error on AVM microservice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
   /documents/{guid}/datatosign:
     post:
@@ -236,27 +317,52 @@ paths:
         content:
           "application/json":
             schema:
-              type: object
-              properties:
-                signingCertificate:
-                  $ref: "#/components/schemas/SigningCertificate"
-              required:
-                - signingCertificate
+              $ref: "#/components/schemas/DataToSignRequestBody"
       responses:
-        400:
-          description: Bad request
-        401:
-          description: EncryptionKey not provided
-        403:
-          description: EncryptionKey mismatch
-        404:
-          description: Not found
         200:
           description: Computed DataToSign and exact SigningTime.
           content:
             "application/json":
               schema:
                 $ref: "#/components/schemas/DataToSignStructure"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponseBody"
+        401:
+          description: EncryptionKey not provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyNotProvidedErrorResponseBody"
+        403:
+          description: EncryptionKey mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyMismatchErrorResponseBody"
+        404:
+          description: Not found
+        422:
+          description: Unprocessable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseBody"
+        500:
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalErrorResponseBody"
+        502:
+          description: Bad gateway - internal error on AVM microservice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
   /documents/{guid}/sign:
     post:
@@ -291,16 +397,6 @@ paths:
             schema:
               $ref: "#/components/schemas/SignRequestBody"
       responses:
-        400:
-          description: Bad request
-        401:
-          description: EncryptionKey not provided
-        403:
-          description: EncryptionKey mismatch
-        404:
-          description: Not found
-        422:
-          description: Unprocessable entity - possibly dataToSign mismatch.
         200:
           description: |
             Document was sucessfuly signed, can be obtained via GET signed request, and is also returned in the response.
@@ -310,6 +406,44 @@ paths:
             "application/json":
               schema:
                 $ref: "#/components/schemas/SignDocumentResponse"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponseBody"
+        401:
+          description: EncryptionKey not provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyNotProvidedErrorResponseBody"
+        403:
+          description: EncryptionKey mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyMismatchErrorResponseBody"
+        404:
+          description: Not found
+        422:
+          description: Unprocessable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseBody"
+        500:
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalErrorResponseBody"
+        502:
+          description: Bad gateway - internal error on AVM microservice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
 components:
   schemas:
@@ -346,6 +480,19 @@ components:
       type: integer
       description: Epoch timestamp in milliseconds of the signing time
       example: 1707900119123
+
+    DataToSignRequestBody:
+      type: object
+      properties:
+        signingCertificate:
+          $ref: "#/components/schemas/SigningCertificate"
+        addTimestamp:
+          type: boolean
+          description: Indication whether to add a timestamp to the signature if it was not set at document creation time
+          example: true
+          default: false
+      required:
+        - signingCertificate
 
     DataToSignStructure:
       type: object
@@ -490,15 +637,160 @@ components:
       required:
         - level
 
+    CreateDocumentResponseBody:
+      type: object
+      properties:
+        guid:
+          type: string
+          description: GUID of the posted document
+          example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
+      required:
+        - guid
+
+    VisualizationResponse:
+      type: object
+      properties:
+        mimeType:
+          type: string
+          example: "application/pdf;base64"
+        filename:
+          type: string
+          description: Name of the document
+          example: sample_document.pdf
+        content:
+          type: string
+          description: Base64 encoded contentto be displayed
+          example: ZXhhbXBsZSBzdHJpbmcgaW4gYmFzZTY0Cg==
+      required:
+        - mimeType
+        - content
+
+    BadRequestErrorResponseBody:
+      type: object
+      properties:
+        code:
+          type: string
+          example: BAD_REQUEST
+          description: Code that can be used to identify the error.
+        message:
+          type: string
+          example: Parameter missing.
+          description: Human readable error message.
+        details:
+          type: string
+          example: Document ID is missing in request.
+          description: Optional details.
+      required:
+        - code
+        - message
+
+    ErrorResponseBody:
+      type: object
+      properties:
+        code:
+          type: string
+          example: UNPROCESSABLE_INPUT
+          description: Code that can be used to identify the error.
+        message:
+          type: string
+          example: IllegalArgumentException parsing request body
+          description: Human readable error message.
+        details:
+          type: string
+          example: Document must be a PDF when using PAdES.
+          description: Optional details.
+      required:
+        - code
+        - message
+
+    EncryptionKeyNotProvidedErrorResponseBody:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - ENCRYPTION_KEY_MISSING
+            - ENCRYPTION_KEY_MALFORMED
+          description: Code that can be used to identify the error.
+        message:
+          type: string
+          example: Encryption key not provided.
+          description: Human readable error message.
+        details:
+          type: string
+          example: Encryption key must be provided either in X-Encryption-Key header or as encryptionKey query parameter.
+          description: Optional details.
+      required:
+        - code
+        - message
+
+    EncryptionKeyMismatchErrorResponseBody:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - ENCRYPTION_KEY_MISMATCH
+          description: Code that can be used to identify the error.
+        message:
+          type: string
+          example: Encryption key mismatch.
+          description: Human readable error message.
+        details:
+          type: string
+          example: Provided encryption key failed to decrypt document.
+          description: Optional details.
+      required:
+        - code
+        - message
+
+    InternalErrorResponseBody:
+      type: object
+      properties:
+        code:
+          type: string
+          example: INTERNAL_ERROR
+          description: Code that can be used to identify the error.
+        message:
+          type: string
+          example: Unexpected error while signing document.
+          description: Human readable error message.
+        details:
+          type: string
+          example: Something unexpected happened.
+          description: Optional details.
+      required:
+        - code
+        - message
+
+    BadGatewayErrorResponseBody:
+      type: object
+      properties:
+        code:
+          type: string
+          example: UNRECOGNIZED_DSS_ERROR
+          description: Code that can be used to identify the error.
+        message:
+          type: string
+          example: Unexpected error while signing document.
+          description: Human readable error message.
+        details:
+          type: string
+          example: Something unexpected happened.
+          description: Optional details.
+      required:
+        - code
+        - message
+
   securitySchemes:
     Header:
       type: apiKey
       in: header
       name: X-Encryption-Key
-      description: AES256 encryption key in hexadecimal form that is used to encrypt and decrypt signing doucment.
+      description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing doucment.
 
     Parameter:
       type: apiKey
       in: query
       name: encryptionKey
-      description: AES256 encryption key in hexadecimal form that is used to encrypt and decrypt signing doucment.
+      description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing doucment.
