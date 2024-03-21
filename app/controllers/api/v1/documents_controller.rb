@@ -52,7 +52,8 @@ class Api::V1::DocumentsController < ApplicationController
     def set_key
       @key = request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey]
       raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MISSING", "Encryption key not provided.", "Encryption key must be provided either in X-Encryption-Key header or as encryptionKey query parameter.") unless @key
-      raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key invalid.", "Encryption key must be a 64 character long hexadecimal string.") unless validate_key(@key)
+      # TODO
+      # raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key invalid.", "Encryption key must be a 64 character long hexadecimal string.") unless validate_key(@key)
     end
 
     def validate_key(key)
