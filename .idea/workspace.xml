@@ -5,19 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="39c03592-7d9a-4888-9f4f-d3d5ae9eb2b6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/controllers/errors_controller.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/errors/avm_bad_encryption_key_error.rb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/errors/avm_unauthorized_error.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/api/v1/documents_controller.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/api/v1/documents_controller.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/application_controller.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/application_controller.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/document.rb" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/document.rb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/avm-server.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/avm-server.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/application.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/application.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/credentials.yml.enc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/environments/development.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/environments/development.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/routes.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/routes.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/openapi.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/public/openapi.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/api/v1/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/api/v1/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +43,7 @@
     "Rails.avm-server.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "stabilize-error-responses",
+    "git-widget-placeholder": "Merging stabilize-error-responses",
     "last_opened_file_path": "/Users/turtle/slovensko-digital/avm-server/public",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -348,7 +340,7 @@
       <workItem from="1710496181677" duration="1571000" />
       <workItem from="1710927405754" duration="6621000" />
       <workItem from="1710936523778" duration="82000" />
-      <workItem from="1710936613572" duration="14831000" />
+      <workItem from="1710936613572" duration="15648000" />
     </task>
     <servers />
   </component>
