@@ -30,6 +30,8 @@ module AutogramServer
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    config.exceptions_app = self.routes
+
     Rails.application.config.generators { |g| g.orm :active_record, primary_key_type: :uuid }
   end
 end

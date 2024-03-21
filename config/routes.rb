@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  get "/400", to: "errors#bad_request"
+  get "/500", to: "errors#internal_error"
+
   namespace :api do
     namespace :v1 do
       resources :documents, only: [:show, :create, :destroy] do

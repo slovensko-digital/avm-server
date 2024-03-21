@@ -220,7 +220,7 @@ PLATFORMS
 DEPENDENCIES
   base64
   bootsnap
-  debug
+  debug (>= 1.6.2)
   dotenv-rails
   faraday
   jbuilder
