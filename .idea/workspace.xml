@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="39c03592-7d9a-4888-9f4f-d3d5ae9eb2b6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/avm-server.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/avm-server.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/application.rb" beforeDir="false" afterPath="$PROJECT_DIR$/config/application.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/api/v1/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/api/v1/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +39,7 @@
     "Rails.avm-server.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "Merging stabilize-error-responses",
+    "git-widget-placeholder": "stabilize-error-responses",
     "last_opened_file_path": "/Users/turtle/slovensko-digital/avm-server/public",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -340,7 +336,7 @@
       <workItem from="1710496181677" duration="1571000" />
       <workItem from="1710927405754" duration="6621000" />
       <workItem from="1710936523778" duration="82000" />
-      <workItem from="1710936613572" duration="15648000" />
+      <workItem from="1710936613572" duration="17664000" />
     </task>
     <servers />
   </component>
