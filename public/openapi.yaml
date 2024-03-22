@@ -2,7 +2,7 @@ openapi: '3.0.2'
 
 info:
   title: AVM Server
-  version: '0.2.0'
+  version: '0.3.0'
 
 servers:
   - url: https://autogram.slovensko.digital/api/v1
@@ -117,7 +117,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: "#/components/schemas/GetDocumentResponse"
+                $ref: "#/components/schemas/GetDocumentResponseBody"
           headers:
             Last-Modified:
               schema:
@@ -253,7 +253,74 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: "#/components/schemas/VisualizationResponse"
+                $ref: "#/components/schemas/DocumentVisualizationResponseBody"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponseBody"
+        401:
+          description: EncryptionKey not provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyNotProvidedErrorResponseBody"
+        403:
+          description: EncryptionKey mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyMismatchErrorResponseBody"
+        404:
+          description: Not found
+        422:
+          description: Unprocessable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseBody"
+        500:
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalErrorResponseBody"
+        502:
+          description: Bad gateway - internal error on AVM microservice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadGatewayErrorResponseBody"
+
+  /documents/{guid}/validation:
+    get:
+      tags:
+        - Mobile2App
+      description: Client app requests a signature validation report of the document.
+      parameters:
+        - name: guid
+          in: path
+          schema:
+            type: string
+          required: true
+          example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
+        - name: Accept
+          in: header
+          schema:
+            type: string
+            default: application/json
+          required: true
+          allowEmptyValue: false
+      responses:
+        200:
+          description: Validation report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentValidationResponseBody"
+        204:
+          description: Document is not signed yet, no content response.
         400:
           description: Bad request
           content:
@@ -405,7 +472,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: "#/components/schemas/SignDocumentResponse"
+                $ref: "#/components/schemas/SignDocumentResponseBody"
         400:
           description: Bad request
           content:
@@ -426,6 +493,12 @@ paths:
                 $ref: "#/components/schemas/EncryptionKeyMismatchErrorResponseBody"
         404:
           description: Not found
+        409:
+          description: Signature invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidSignatureErrorResponseBody"
         422:
           description: Unprocessable content
           content:
@@ -461,10 +534,11 @@ components:
             MIME type for document content and signature parameters XSLT transformation and XSD schema.
             Binary files should be encoded using base64, e.g., `application/pdf;base64`.
             Text formats like XML can be optionally encoded using base64 or supplied as plain text.
+            
+            If omitted, mimetype is decided based on document.filename and content is expected to be in Base64.
       required:
         - document
         - parameters
-        - payloadMimeType
 
     SigningCertificate:
       type: string
@@ -524,7 +598,7 @@ components:
         - signedData
         - dataToSignStructure
 
-    SignDocumentResponse:
+    SignDocumentResponseBody:
       type: object
       properties:
         filename:
@@ -557,7 +631,7 @@ components:
         - signedBy
         - issuedBy
 
-    GetDocumentResponse:
+    GetDocumentResponseBody:
       type: object
       properties:
         filename:
@@ -647,7 +721,7 @@ components:
       required:
         - guid
 
-    VisualizationResponse:
+    DocumentVisualizationResponseBody:
       type: object
       properties:
         mimeType:
@@ -664,6 +738,250 @@ components:
       required:
         - mimeType
         - content
+
+    DocumentValidationResponseBody:
+      type: object
+      properties:
+        fileFormat:
+          type: string
+          enum:
+            - ASiC_E
+            - ASiC_S
+            - PAdES
+            - XAdES
+          description: Format of the validated file. ASiC_E or ASiC_S for an ASiC container. XAdES for standalone XAdES XML file and PAdES for PAdES.
+          example: ASiC_E
+        signatures:
+          type: array
+          items:
+            type: object
+            properties:
+              validationResult:
+                type: object
+                description: |
+                  The standard ETSI EN 319 102-1 specifies a complete validation model and procedures for the validation of “AdES digital signatures”, which are implemented in the underlying DSS module.
+                  The validation result can have these values:
+
+                  "0 TOTAL_PASSED: indicating that the signature has passed verification and it complies with the signature validation policy"
+
+                  "1 TOTAL_FAILED: indicating that either the signature format is incorrect or that the digital signature value fails the verification"
+
+                  "2 INDETERMINATE: indicating that the format and digital signature verifications have not failed but there is insufficient information to determine if the electronic signature is valid"
+                properties:
+                  code:
+                    type: integer
+                    enum:
+                      - 0
+                      - 1
+                      - 2
+                    example: 0
+                  description:
+                    type: string
+                    enum:
+                      - TOTAL_PASSED
+                      - TOTAL_FAILED
+                      - INDETERMINATE
+                    example: TOTAL_PASSED
+              signatureInfo:
+                type: object
+                properties:
+                  claimedSigningTime:
+                    type: string
+                    description: Claimed signing time based on the signature only.
+                    example: "2022-12-20T21:29:13 +0100"
+                  timestampSigningTime:
+                    type: string
+                    description: NotAfter signing time based on the first timestamp in signature.
+                    example: "2022-12-20T21:29:13 +0100"
+                  level:
+                    type: string
+                    enum:
+                      - XAdES_BASELINE_B
+                      - XAdES_BASELINE_T
+                      - XAdES_BASELINE_LT
+                      - XAdES_BASELINE_LTA
+                      - PAdES_BASELINE_B
+                      - PAdES_BASELINE_T
+                      - PAdES_BASELINE_LT
+                      - PAdES_BASELINE_LTA
+                      - CAdES_BASELINE_B
+                      - CAdES_BASELINE_T
+                      - CAdES_BASELINE_LT
+                      - CAdES_BASELINE_LTA
+                    description: Signature level of the signature.
+                    example: XAdES_BASELINE_LTA
+                  signingCertificate:
+                    type: object
+                    description: Signing certificate details.
+                    properties:
+                      issuerDN:
+                        type: string
+                        description: RFC1779 of the signing certificate issuer name.
+                        example: CN=CA Disig QCA3, OU=ACA-307-2007-2, O=Disig a.s., OID.2.5.4.5=NTRSK-35975946, L=Bratislava, C=SK
+                      subjectDN:
+                        type: string
+                        description: RFC1779 of the signing certificate name.
+                        example: C=SK, L=Bratislava, OID.2.5.4.5=NTRSK-30807484, O=Sociálna poisťovňa, CN=Sociálna poisťovňa
+                      serialNumber:
+                        type: string
+                        description: SerialNumber of the signing certificate.
+                        example: 81308597867087210236466
+                      productionTime:
+                        type: string
+                        description: Claimed signing time.
+                        example: "2022-12-20T21:29:13 +0100"
+                      notBefore:
+                        type: string
+                        description: The NotBefore (issuance) time of the signing certificate.
+                        example: "2019-07-03T15:21:51 +0200"
+                      notAfter:
+                        type: string
+                        description: The NotAfter time of the signing certificate.
+                        example: "2023-07-02T15:21:51 +0200"
+                      qualification:
+                        type: object
+                        description: Qualification of the signature at validation time. For more info check out Java class eu.europa.esig.dss.enumerations.SignatureQualification
+                        properties:
+                          code:
+                            type: integer
+                            example: 1
+                          description:
+                            type: string
+                            enum:
+                              - QESIG
+                              - QESEAL
+                              - UNKNOWN_QC_QSCD-QC-QSCD
+                              - ADESIG_QC-QC
+                              - ADESEAL_QC-QC
+                              - UNKNOWN_QC-QC
+                              - ADESIG
+                              - ADESEAL
+                              - UNKNOWN
+                              - INDETERMINATE_QESIG
+                              - INDETERMINATE_QESEAL
+                              - INDETERMINATE_UNKNOWN_QC_QSCD
+                              - INDETERMINATE_ADESIG_QC
+                              - INDETERMINATE_ADESEAL_QC
+                              - INDETERMINATE_UNKNOWN_QC
+                              - INDETERMINATE_ADESIG
+                              - INDETERMINATE_ADESEAL
+                              - INDETERMINATE_UNKNOWN
+                              - NOT_ADES_QC_QSCD
+                              - NOT_ADES_QC
+                              - NOT_ADES
+                              - NA
+                            example: QESeal
+                  isTimestamped:
+                    type: boolean
+                    description: Boolean indicating if the signature has any timestamp.
+                    example: true
+                  timestamps:
+                    type: array
+                    description: List of timestamps on the signature.
+                    items:
+                      type: object
+                      properties:
+                        issuerDN:
+                          type: string
+                          description: RFC1779 of the timestamp certificate issuer name.
+                          example: CN=SNCA4, O=Narodna agentura pre sietove a elektronicke sluzby, OID.2.5.4.97=NTRSK-42156424, OU=SNCA, C=SK
+                        subjectDN:
+                          type: string
+                          description: RFC1779 of the timestamp certificate name.
+                          example: CN=NASES Time Stamp Authority 2, O=Národná agentúra pre sieťové a elektronické služby, OID.2.5.4.97=NTRSK-42156424, OU=SNCA, C=SK
+                        serialNumber:
+                          type: string
+                          description: SerialNumber of the timestamp certificate.
+                          example: 21220574739238913835018
+                        productionTime:
+                          type: string
+                          description: ProductionTime of the timestamp.
+                          example: "2022-12-20T21:29:13 +0100"
+                        notBefore:
+                          type: string
+                          description: The NotBefore (issuance) time of the timestamp certificate.
+                          example: "2021-04-15T13:31:24 +0200"
+                        notAfter:
+                          type: string
+                          description: The NotAfter time of the timestamp certificate.
+                          example: "2026-04-14T13:31:24 +0200"
+                        qualification:
+                          type: object
+                          description: |
+                            Qualification status fo the timestamp at validation time.
+
+                            QTSA - Qualified timestamp" - "urn:cef:dss:timestampQualification:QTSA"
+                            TSA - Not qualified timestamp" - "urn:cef:dss:timestampQualification:TSA"
+                            NA - Not applicable" - "urn:cef:dss:timestampQualification:notApplicable"
+                          properties:
+                            code:
+                              type: integer
+                              enum:
+                                - 0
+                                - 1
+                                - 2
+                              example: 0
+                            description:
+                              type: string
+                              enum:
+                                - QTSA
+                                - TSA
+                                - NA
+                              example: QTSA
+                        timestampType:
+                          type: string
+                          enum:
+                            - CONTENT_TIMESTAMP
+                            - ALL_DATA_OBJECTS_TIMESTAMP
+                            - INDIVIDUAL_DATA_OBJECTS_TIMESTAMP
+                            - SIGNATURE_TIMESTAMP
+                            - VRI_TIMESTAMP
+                            - VALIDATION_DATA_REFSONLY_TIMESTAMP
+                            - VALIDATION_DATA_TIMESTAMP
+                            - DOCUMENT_TIMESTAMP
+                            - ARCHIVE_TIMESTAMP
+                          description: Type of the timestamp
+                          example: SIGNATURE_TIMESTAMP
+                  signedObjectsIds:
+                    type: array
+                    items:
+                      type: string
+                      description: List of IDs referencing files this signature have signed.
+                      example: "D-CE70D85E47F41DE68616A3695FE7569BF8F7409F052B74AE0356663393A68D8A"
+        signedObjects:
+          type: array
+          description: List of files in the container that are signed by at least one signature
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: ID of the file used to reference the file in signatures
+                example: "D-CE70D85E47F41DE68616A3695FE7569BF8F7409F052B74AE0356663393A68D8A"
+              mimeType:
+                type: string
+                description: MimeType of the file
+                example: text/xml
+              filename:
+                type: string
+                description: Filename of the file in the container. If the validated document is PAdES or standalone XAdES where filename is unknown, this attribute should be ignored.
+                example: form.xml
+        unsignedObjects:
+          type: array
+          description: List of files in the container that have not been referenced in any signature yet
+          items:
+            type: object
+            properties:
+              mimeType:
+                type: string
+                description: MimeType of the file
+                example: application/pdf
+              filename:
+                type: string
+                description: Filename of the file in the container. If the validated document is PAdES or standalone XAdES where filename is unknown, this attribute should be ignored.
+                example: Some_unsigned_document.pdf
+      required:
+        - fileFormat
 
     BadRequestErrorResponseBody:
       type: object
@@ -689,8 +1007,23 @@ components:
       properties:
         code:
           type: string
-          example: UNPROCESSABLE_INPUT
-          description: Code that can be used to identify the error.
+          enum:
+            - UNPROCESSABLE_INPUT
+            - UNSUPPORTED_SIGNATURE_LEVEL
+            - MULTIPLE_ORIGINAL_DOCUMENTS
+            - ORIGINAL_DOCUMENT_NOT_FOUND
+            - MALFORMED_INPUT
+            - EMPTY_BODY
+            - DATATOSIGN_MISMATCH
+            - CERTIFICATE_NOT_VALID
+          description: |
+            Code that can be used to identify the error.
+            
+            `MULTIPLE_ORIGINAL_DOCUMENTS` will be removed in the future possibly.
+            
+            `DATATOSIGN_MISMATCH` applies to `/sign` request only.
+            
+            `CERTIFICATE_NOT_VALID` applies to `/datatosign` and `/sign` requests only.
         message:
           type: string
           example: IllegalArgumentException parsing request body
@@ -749,7 +1082,8 @@ components:
       properties:
         code:
           type: string
-          example: INTERNAL_ERROR
+          enum:
+            - INTERNAL_ERROR
           description: Code that can be used to identify the error.
         message:
           type: string
@@ -768,7 +1102,10 @@ components:
       properties:
         code:
           type: string
-          example: UNRECOGNIZED_DSS_ERROR
+          enum:
+            - UNRECOGNIZED_DSS_ERROR
+            - SIGNING_FAILED
+            - INTERNAL_ERROR
           description: Code that can be used to identify the error.
         message:
           type: string
@@ -777,6 +1114,32 @@ components:
         details:
           type: string
           example: Something unexpected happened.
+          description: Optional details.
+      required:
+        - code
+        - message
+
+    InvalidSignatureErrorResponseBody:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - INVALID_SIGNATURE_VALUE
+            - SIGNATURE_NOT_IN_TACT
+          description: |
+            Code that can be used to identify the error.
+            
+            `INVALID_SIGNATURE_VALUE` - the `signedData` sent by client are not corresponding with dataToSign and certificate.
+            
+            `SIGNATURE_NOT_IN_TACT` - signature value is not valid for the signed document.
+        message:
+          type: string
+          example: Created signature is not valid.
+          description: Human readable error message.
+        details:
+          type: string
+          example: The signed data were not signed by the provided certificate.
           description: Optional details.
       required:
         - code
