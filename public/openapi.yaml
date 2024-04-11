@@ -12,10 +12,8 @@ tags:
   - name: Mobile2App
   - name: Desktop2App - Extension
   - name: Desktop2App - Client
-
-security:
-  - Header: []
-  - Parameter: []
+  - name: Minimal Integration
+  - name: Integration
 
 paths:
   /documents:
@@ -23,6 +21,10 @@ paths:
       tags:
         - Mobile2App
         - Desktop2App - Extension
+      security:
+        - Header: [ ]
+        - Parameter: [ ]
+      summary: Client app posts document along with some parameters to Server.
       description: Client app posts document along with some parameters to Server. Server encrypts the document using the provided EncryptionKey and stores it on a disk.
       requestBody:
         content:
@@ -86,10 +88,11 @@ paths:
     get:
       tags:
         - Desktop2App - Extension
-      description: |
-        External system requests signed document at the end of the process.
-
-        This endpoint is also designed for polling with the `If-Modified-Since` header (`TODO`).
+      security:
+        - Header: [ ]
+        - Parameter: [ ]
+      summary: External system requests signed document at the end of the process.
+      description: This endpoint is also designed for polling with the `If-Modified-Since` header (`TODO`).
       parameters:
         - name: guid
           in: path
@@ -174,10 +177,13 @@ paths:
                 $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
     delete:
-      description: |
-        External system requests signed document at the end of the process.
-
-        This endpoint is also designed for polling with the `If-Modified-Since` header.
+      tags:
+        - Desktop2App - Extension
+      security:
+        - Header: [ ]
+        - Parameter: [ ]
+      summary: External system requests signed document at the end of the process.
+      description: This endpoint is also designed for polling with the `If-Modified-Since` header.
       parameters:
         - name: guid
           in: path
@@ -232,7 +238,10 @@ paths:
       tags:
         - Desktop2App - Client
         - Mobile2App
-      description: Client app requests encrypted document to visualize it.
+      security:
+        - Header: [ ]
+        - Parameter: [ ]
+      summary: Client app requests encrypted document to visualize it.
       parameters:
         - name: guid
           in: path
@@ -297,7 +306,10 @@ paths:
     get:
       tags:
         - Mobile2App
-      description: Client app requests a signature validation report of the document.
+      security:
+        - Header: [ ]
+        - Parameter: [ ]
+      summary: Client app requests a signature validation report of the document.
       parameters:
         - name: guid
           in: path
@@ -365,6 +377,10 @@ paths:
       tags:
         - Mobile2App
         - Desktop2App - Client
+      security:
+        - Header: [ ]
+        - Parameter: [ ]
+      summary: Client app gets datatosign based on provided signing certificate.
       description: Client app posts signing certificate to the server. Server decrypts the encrypted document from disk, computes DataToSign and returns it along exact signing time in milliseconds. The whole response object is later required for POST /sign request.
       parameters:
         - name: guid
@@ -436,7 +452,10 @@ paths:
       tags:
         - Mobile2App
         - Desktop2App - Client
-      description: Create signed document using the SignedData obtained from client.
+      security:
+        - Header: [ ]
+        - Parameter: [ ]
+      summary: Create signed document using the SignedData obtained from client.
       parameters:
         - name: guid
           in: path
@@ -518,8 +537,295 @@ paths:
               schema:
                 $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
+  /devices:
+    post:
+      tags:
+        - Integration
+        - Minimal Integration
+      summary: Device registers itself at the server
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostDeviceRequestBody"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDeviceResponse"
+
+  /devices/{device_id}/integrations:
+    post:
+      tags:
+        - Integration
+        - Minimal Integration
+      summary: Device registers itself for receiving sign requests (push notification) from given integration
+      parameters:
+      - name: device_id
+        in: path
+        description: Identifier of the device
+        example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
+        required: true
+        allowEmptyValue: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostDeviceIntegrationsRequestBody"
+      responses:
+        200:
+          description: OK
+
+    get:
+      tags:
+        - Integration
+      summary: Integration retrieves a list of paired devices
+      parameters:
+        - name: integration_id
+          in: path
+          description: Identifier of the registration that shall be allowed to push notifications for device. Value should be obtained via QR code or registered url handler.
+          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
+          required: true
+          allowEmptyValue: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetDeviceIntegrationsResponseBody"
+
+  /devices/{device_id}/integrations/{integration_id}:
+    delete:
+      tags:
+        - Integration
+      summary: Integration deletes device from its subscribers
+      parameters:
+        - name: integration_id
+          in: path
+          description: Identifier of the integration
+          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
+          required: true
+          allowEmptyValue: false
+        - name: device_id
+          in: path
+          description: Identifier of the device
+          example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
+          required: true
+          allowEmptyValue: false
+      responses:
+        204:
+          description: OK
+        404:
+          description: Not found
+
+  /integrations:
+    post:
+      tags:
+        - Integration
+        - Minimal Integration
+      summary: Integration registers itself at the server
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostIntegrationRequestBody"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostIntegrationResponse"
+
+  /integrations/{integration_id}/devices:
+    get:
+      tags:
+        - Integration
+      summary: Integration retrieves a list of connected devices
+      parameters:
+        - name: integration_id
+          in: path
+          description: Identifier of the integration
+          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
+          required: true
+          allowEmptyValue: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetIntegrationDevicesResponseBody"
+
+  /integrations/{integration_id}/devices/{device_id}:
+    delete:
+      tags:
+        - Integration
+      summary: Integration deletes device from its subscribers
+      parameters:
+        - name: integration_id
+          in: path
+          description: Identifier of the integration
+          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
+          required: true
+          allowEmptyValue: false
+        - name: device_id
+          in: path
+          description: Identifier of the device
+          example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
+          required: true
+          allowEmptyValue: false
+      responses:
+        204:
+          description: OK
+        404:
+          description: Not found
+
+  /integrations/{integration_id}/sign_request:
+    post:
+      tags:
+        - Integration
+        - Minimal Integration
+      summary: Integration sends a sign request (push notification) to all paired signing devices
+      parameters:
+        - name: integration_id
+          in: path
+          description: Identifier of the integration
+          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
+          required: true
+          allowEmptyValue: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostSignRequestBody"
+      responses:
+        200:
+          description: OK
+
 components:
   schemas:
+    PostSignRequestBody:
+      type: object
+      properties:
+        document_guid:
+          type: string
+          example: e1b2fafc-59c4-46de-ac0a-83aa782184e9
+          description: GUID of the document to sign
+        document_encryption_key:
+          type: string
+          description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing doucment.
+          example: 5e0523acd9ec45f7d08295a029cc296f5cb5e713588c2e2b6fd95ed4a8a4b404
+      required:
+        - document_guid
+        - document_encryption_key
+
+    PostIntegrationRequestBody:
+      type: object
+      properties:
+        platform:
+          type: string
+          description: Platform identifier
+          example: extension
+        display_name:
+          type: string
+          description: Human-readable name of the integration
+          example: Autogram browser extension
+      required:
+        - platform
+        - display_name
+
+    PostIntegrationResponse:
+      type: object
+      properties:
+        guid:
+          type: string
+          description: Assigned identifier
+          example: 57820662-f56c-4b2f-97d1-e95306aee6db
+
+    PostDeviceResponse:
+      type: object
+      properties:
+        guid:
+          type: string
+          description: Assigned identifier
+          example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
+
+    PostDeviceRequestBody:
+      type: object
+      properties:
+        platform:
+          type: string
+          description: Platform of the signing device used to determine which notification service to use. (`android` or `ios`)
+          example: android
+        registration_id:
+          type: string
+          description: Identifier of the app instance registration entry in the notification service (APNS or GCM)
+          example: idk32b83ef7-21fe-4120-b8fa-d9f6aba05731
+        display_name:
+          type: string
+          description: Human-readable name of the device
+          example: John's phone
+      required:
+        - platform
+        - registration_id
+        - display_name
+
+    GetDeviceIntegrationsResponseBody:
+      type: array
+      items:
+        type: object
+        properties:
+          integration_id:
+            type: string
+            description: Identifier of the integration
+            example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
+          platform:
+            type: string
+            description: Platform identifier
+            example: extension
+          display_name:
+            type: string
+            description: Human-readable name of the integration
+            example: Autogram browser extension
+        required:
+          - platform
+          - integration_id
+          - display_name
+
+    GetIntegrationDevicesResponseBody:
+      type: array
+      items:
+        type: object
+        properties:
+          device_id:
+            type: string
+            description: Identifier of the device
+            example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
+          platform:
+            type: string
+            description: Platform of the signing device used to determine which notification service to use. (`android` or `ios`)
+            example: android
+          display_name:
+            type: string
+            description: Human-readable name of the device
+            example: John's phone
+        required:
+          - platform
+          - device_id
+          - display_name
+
+    PostDeviceIntegrationsRequestBody:
+      type: object
+      properties:
+        integration_id:
+          type: string
+          description: Identifier of the integration
+          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
+
     DocumentPostRequestBody:
       type: object
       properties:
@@ -671,7 +977,6 @@ components:
         - issuedBy
 
     Document:
-      description: JSON object that is encrypted for
       type: object
       properties:
         filename:
