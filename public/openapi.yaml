@@ -13,6 +13,7 @@ tags:
   - name: Desktop2App - Extension
   - name: Desktop2App - Client
   - name: Minimal Integration
+  - name: QR code
   - name: Integration
 
 paths:
@@ -537,6 +538,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
+  /integrations:
+    post:
+      tags:
+        - Integration
+        - Minimal Integration
+      summary: Integration registers itself at the server
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostIntegrationRequestBody"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostIntegrationResponse"
+
   /devices:
     post:
       tags:
@@ -556,11 +576,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/PostDeviceResponse"
 
-  /devices/{device_id}/integrations:
+  /device-integrations:
     post:
       tags:
         - Integration
         - Minimal Integration
+      security:
+        - JWT: []
       summary: Device registers itself for receiving sign requests (push notification) from given integration
       parameters:
       - name: device_id
@@ -581,6 +603,8 @@ paths:
     get:
       tags:
         - Integration
+      security:
+        - JWT: []
       summary: Integration retrieves a list of paired devices
       parameters:
         - name: integration_id
@@ -597,10 +621,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/GetDeviceIntegrationsResponseBody"
 
-  /devices/{device_id}/integrations/{integration_id}:
+  /device-integrations/{integration_id}:
     delete:
       tags:
         - Integration
+      security:
+        - JWT: []
       summary: Integration deletes device from its subscribers
       parameters:
         - name: integration_id
@@ -621,29 +647,12 @@ paths:
         404:
           description: Not found
 
-  /integrations:
-    post:
-      tags:
-        - Integration
-        - Minimal Integration
-      summary: Integration registers itself at the server
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PostIntegrationRequestBody"
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PostIntegrationResponse"
-
-  /integrations/{integration_id}/devices:
+  /integration-devices:
     get:
       tags:
         - Integration
+      security:
+        - JWT: []
       summary: Integration retrieves a list of connected devices
       parameters:
         - name: integration_id
@@ -660,10 +669,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/GetIntegrationDevicesResponseBody"
 
-  /integrations/{integration_id}/devices/{device_id}:
+  /integration-devices/{device_id}:
     delete:
       tags:
         - Integration
+      security:
+        - JWT: []
       summary: Integration deletes device from its subscribers
       parameters:
         - name: integration_id
@@ -684,11 +695,13 @@ paths:
         404:
           description: Not found
 
-  /integrations/{integration_id}/sign_request:
+  /sign-request:
     post:
       tags:
         - Integration
         - Minimal Integration
+      security:
+        - JWT: []
       summary: Integration sends a sign request (push notification) to all paired signing devices
       parameters:
         - name: integration_id
@@ -702,6 +715,30 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/PostSignRequestBody"
+      responses:
+        200:
+          description: OK
+
+  /qr-code:
+    get:
+      tags:
+        - QR code
+      description: "Example: `https://autogram.slovensko.digital/api/v1?guid=e7e95411-66a1-d401-e063-0a64dbb6b796&key=1796de0b0309cef87d45fe5b5c0941b03ed1b98071341b251c70bf3a3f52f8d2&integration=eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiI3OGQ5MWRlNy0xY2MyLTQwZTQtOWE3MS0zODU4YjRmMDMxOWQiLCJleHAiOjE3MTI5MDk3MjAsImp0aSI6IjAwZTAxN2Y1LTI4MTAtNDkyNS04ODRlLWNiN2FhZDAzZDFhNiIsImF1ZCI6ImRldmljZSJ9.7Op6W2BvbX2_mgj9dkz1IiolEsQ1Z2a0AzpS5bj4pcG3CJ4Z8j9W3RQE95wrAj3t6nmd9JaGZSlCJNSV_myyLQ`"
+      parameters:
+        - name: guid
+          in: query
+          description: GUID of a document
+          example: e7e95411-66a1-d401-e063-0a64dbb6b796
+          required: true
+        - name: key
+          in: query
+          description: Encryption key for the document
+          example: 1796de0b0309cef87d45fe5b5c0941b03ed1b98071341b251c70bf3a3f52f8d2
+          required: true
+        - name: integration
+          in: query
+          description: 'JWT of source integration. Can be used to pair device with the integration. Must contain `aud: "device"` claim'
+          example: eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiI3OGQ5MWRlNy0xY2MyLTQwZTQtOWE3MS0zODU4YjRmMDMxOWQiLCJleHAiOjE3MTI5MDk3MjAsImp0aSI6IjAwZTAxN2Y1LTI4MTAtNDkyNS04ODRlLWNiN2FhZDAzZDFhNiIsImF1ZCI6ImRldmljZSJ9.7Op6W2BvbX2_mgj9dkz1IiolEsQ1Z2a0AzpS5bj4pcG3CJ4Z8j9W3RQE95wrAj3t6nmd9JaGZSlCJNSV_myyLQ
       responses:
         200:
           description: OK
@@ -734,6 +771,10 @@ components:
           type: string
           description: Human-readable name of the integration
           example: Autogram browser extension
+        public_key:
+          type: string
+          description: Integration's ES256 public key that shall be used to authenticate its JWT tokens
+          example: "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGoqUt0JPQgvvMhLNxFQkwOoClKxDK8D8oW+qmakxQuOJuy/V0uKPJbhRkEWz8WPFZCUXUr1LsD5E667h5StmLw==\n-----END PUBLIC KEY-----"
       required:
         - platform
         - display_name
@@ -745,14 +786,8 @@ components:
           type: string
           description: Assigned identifier
           example: 57820662-f56c-4b2f-97d1-e95306aee6db
-
-    PostDeviceResponse:
-      type: object
-      properties:
-        guid:
-          type: string
-          description: Assigned identifier
-          example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
+      required:
+        - guid
 
     PostDeviceRequestBody:
       type: object
@@ -769,10 +804,22 @@ components:
           type: string
           description: Human-readable name of the device
           example: John's phone
+        public_key:
+          type: string
+          description: Device's ES256 public key that shall be used to authenticate its JWT tokens and also encrypt push notification data.
+          example: "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1iPVm0v/ZNM04587g10F54JVIrMZqWnlOXuGjOvcYsuweTYxuXafP8aJ6kIXe+jQhjeldm2mQZzSZ4ceLRq0yA==\n-----END PUBLIC KEY-----"
       required:
         - platform
         - registration_id
         - display_name
+
+    PostDeviceResponse:
+      type: object
+      properties:
+        guid:
+          type: string
+          description: Assigned identifier
+          example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
 
     GetDeviceIntegrationsResponseBody:
       type: array
@@ -821,10 +868,12 @@ components:
     PostDeviceIntegrationsRequestBody:
       type: object
       properties:
-        integration_id:
+        integration_pairing_token:
           type: string
-          description: Identifier of the integration
-          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
+          description: "JWT token provided by integration on pairing. The token must contain `aud: \"device\"` claim."
+          example: eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiI3OGQ5MWRlNy0xY2MyLTQwZTQtOWE3MS0zODU4YjRmMDMxOWQiLCJleHAiOjE3MTI5MDk3MjAsImp0aSI6IjAwZTAxN2Y1LTI4MTAtNDkyNS04ODRlLWNiN2FhZDAzZDFhNiIsImF1ZCI6ImRldmljZSJ9.7Op6W2BvbX2_mgj9dkz1IiolEsQ1Z2a0AzpS5bj4pcG3CJ4Z8j9W3RQE95wrAj3t6nmd9JaGZSlCJNSV_myyLQ
+      required:
+        - integration_pairing_token
 
     DocumentPostRequestBody:
       type: object
@@ -1462,3 +1511,31 @@ components:
       in: query
       name: encryptionKey
       description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing doucment.
+
+    JWT:
+      description: |
+        JWT token must be encoded using ES256 and subject-specific (device or integration) key matching `sub` claim.
+        Maximum `exp` claim duration id 15 minutes.
+        `jti` claim is required and must be unique for the 15 minutes. 
+        `jti` claim must complain with regular expression: `/\A[0-9a-z\-_]{32,256}\z/i`
+
+        Example of `header` segment:
+
+              {
+                "alg": "ES256",
+              }
+
+        Example `payload` segment:
+
+              {
+                "sub": "123",
+                "exp": 1543437976,
+                "jti": "4dee8618-abbe-4dc3-83ba-e984d1396f9f"
+              }
+
+        Token must be present in either:
+        - header `Authorization: Bearer <api-token>`
+        - query parameter `?token=<api-token>`
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
