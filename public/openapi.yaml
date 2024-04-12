@@ -584,20 +584,13 @@ paths:
       security:
         - JWT: []
       summary: Device registers itself for receiving sign requests (push notification) from given integration
-      parameters:
-      - name: device_id
-        in: path
-        description: Identifier of the device
-        example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
-        required: true
-        allowEmptyValue: false
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/PostDeviceIntegrationsRequestBody"
       responses:
-        200:
+        204:
           description: OK
 
     get:
@@ -606,13 +599,6 @@ paths:
       security:
         - JWT: []
       summary: Integration retrieves a list of paired devices
-      parameters:
-        - name: integration_id
-          in: path
-          description: Identifier of the registration that shall be allowed to push notifications for device. Value should be obtained via QR code or registered url handler.
-          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
-          required: true
-          allowEmptyValue: false
       responses:
         200:
           description: OK
@@ -635,12 +621,6 @@ paths:
           example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
           required: true
           allowEmptyValue: false
-        - name: device_id
-          in: path
-          description: Identifier of the device
-          example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
-          required: true
-          allowEmptyValue: false
       responses:
         204:
           description: OK
@@ -654,13 +634,6 @@ paths:
       security:
         - JWT: []
       summary: Integration retrieves a list of connected devices
-      parameters:
-        - name: integration_id
-          in: path
-          description: Identifier of the integration
-          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
-          required: true
-          allowEmptyValue: false
       responses:
         200:
           description: OK
@@ -677,12 +650,6 @@ paths:
         - JWT: []
       summary: Integration deletes device from its subscribers
       parameters:
-        - name: integration_id
-          in: path
-          description: Identifier of the integration
-          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
-          required: true
-          allowEmptyValue: false
         - name: device_id
           in: path
           description: Identifier of the device
@@ -703,13 +670,6 @@ paths:
       security:
         - JWT: []
       summary: Integration sends a sign request (push notification) to all paired signing devices
-      parameters:
-        - name: integration_id
-          in: path
-          description: Identifier of the integration
-          example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
-          required: true
-          allowEmptyValue: false
       requestBody:
         content:
           application/json:
