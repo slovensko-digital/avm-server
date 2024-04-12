@@ -582,7 +582,7 @@ paths:
         - Integration
         - Minimal Integration
       security:
-        - JWT: []
+        - Device JWT: []
       summary: Device registers itself for receiving sign requests (push notification) from given integration
       requestBody:
         content:
@@ -597,7 +597,7 @@ paths:
       tags:
         - Integration
       security:
-        - JWT: []
+        - Device JWT: []
       summary: Integration retrieves a list of paired devices
       responses:
         200:
@@ -612,7 +612,7 @@ paths:
       tags:
         - Integration
       security:
-        - JWT: []
+        - Device JWT: []
       summary: Integration deletes device from its subscribers
       parameters:
         - name: integration_id
@@ -632,7 +632,7 @@ paths:
       tags:
         - Integration
       security:
-        - JWT: []
+        - Integration JWT: []
       summary: Integration retrieves a list of connected devices
       responses:
         200:
@@ -647,7 +647,7 @@ paths:
       tags:
         - Integration
       security:
-        - JWT: []
+        - Integration JWT: []
       summary: Integration deletes device from its subscribers
       parameters:
         - name: device_id
@@ -668,7 +668,7 @@ paths:
         - Integration
         - Minimal Integration
       security:
-        - JWT: []
+        - Integration JWT: []
       summary: Integration sends a sign request (push notification) to all paired signing devices
       requestBody:
         content:
@@ -1472,9 +1472,37 @@ components:
       name: encryptionKey
       description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing doucment.
 
-    JWT:
+    Device JWT:
       description: |
-        JWT token must be encoded using ES256 and subject-specific (device or integration) key matching `sub` claim.
+        JWT token must be encoded using ES256 and device-specific key matching `sub` claim.
+        Maximum `exp` claim duration id 15 minutes.
+        `jti` claim is required and must be unique for the 15 minutes. 
+        `jti` claim must complain with regular expression: `/\A[0-9a-z\-_]{32,256}\z/i`
+
+        Example of `header` segment:
+
+              {
+                "alg": "ES256",
+              }
+
+        Example `payload` segment:
+
+              {
+                "sub": "123",
+                "exp": 1543437976,
+                "jti": "4dee8618-abbe-4dc3-83ba-e984d1396f9f"
+              }
+
+        Token must be present in either:
+        - header `Authorization: Bearer <api-token>`
+        - query parameter `?token=<api-token>`
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+    Integration JWT:
+      description: |
+        JWT token must be encoded using ES256 and integration-specific key matching `sub` claim.
         Maximum `exp` claim duration id 15 minutes.
         `jti` claim is required and must be unique for the 15 minutes. 
         `jti` claim must complain with regular expression: `/\A[0-9a-z\-_]{32,256}\z/i`
