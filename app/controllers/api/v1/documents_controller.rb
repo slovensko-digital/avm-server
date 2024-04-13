@@ -51,7 +51,7 @@ class Api::V1::DocumentsController < ApplicationController
 
     def set_key
       begin
-        @key = Base64.decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
+        @key = Base64.decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey]) "A".bytes
         # TODO
         # @key = Base64.strict_decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
       rescue => e
