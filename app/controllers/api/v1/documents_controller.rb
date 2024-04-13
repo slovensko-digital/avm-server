@@ -50,14 +50,18 @@ class Api::V1::DocumentsController < ApplicationController
     end
 
     def set_key
-      @key = request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey]
+      begin
+        @key = Base64.strict_decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
+      rescue => e
+        raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key Base64 decryption failed.", e.message)
+      end
+
       raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MISSING", "Encryption key not provided.", "Encryption key must be provided either in X-Encryption-Key header or as encryptionKey query parameter.") unless @key
-      # TODO
-      # raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key invalid.", "Encryption key must be a 64 character long hexadecimal string.") unless validate_key(@key)
+      raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key invalid.", "Encryption key must be a base64 string encoding 32 bytes long key.") unless validate_key(@key)
     end
 
     def validate_key(key)
-      key.length == 64 and !key[/\H/]
+      key.length == 32
     end
 
     def decrypt_document_content

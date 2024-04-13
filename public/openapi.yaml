@@ -683,7 +683,7 @@ paths:
     get:
       tags:
         - QR code
-      description: "Example: `https://autogram.slovensko.digital/api/v1?guid=e7e95411-66a1-d401-e063-0a64dbb6b796&key=1796de0b0309cef87d45fe5b5c0941b03ed1b98071341b251c70bf3a3f52f8d2&integration=eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiI3OGQ5MWRlNy0xY2MyLTQwZTQtOWE3MS0zODU4YjRmMDMxOWQiLCJleHAiOjE3MTI5MDk3MjAsImp0aSI6IjAwZTAxN2Y1LTI4MTAtNDkyNS04ODRlLWNiN2FhZDAzZDFhNiIsImF1ZCI6ImRldmljZSJ9.7Op6W2BvbX2_mgj9dkz1IiolEsQ1Z2a0AzpS5bj4pcG3CJ4Z8j9W3RQE95wrAj3t6nmd9JaGZSlCJNSV_myyLQ`"
+      description: "Example: `https://autogram.slovensko.digital/api/v1?guid=e7e95411-66a1-d401-e063-0a64dbb6b796&key=EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ%3D&integration=eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiI3OGQ5MWRlNy0xY2MyLTQwZTQtOWE3MS0zODU4YjRmMDMxOWQiLCJleHAiOjE3MTI5MDk3MjAsImp0aSI6IjAwZTAxN2Y1LTI4MTAtNDkyNS04ODRlLWNiN2FhZDAzZDFhNiIsImF1ZCI6ImRldmljZSJ9.7Op6W2BvbX2_mgj9dkz1IiolEsQ1Z2a0AzpS5bj4pcG3CJ4Z8j9W3RQE95wrAj3t6nmd9JaGZSlCJNSV_myyLQ`"
       parameters:
         - name: guid
           in: query
@@ -693,7 +693,7 @@ paths:
         - name: key
           in: query
           description: Encryption key for the document
-          example: 1796de0b0309cef87d45fe5b5c0941b03ed1b98071341b251c70bf3a3f52f8d2
+          example: EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ=
           required: true
         - name: integration
           in: query
@@ -715,7 +715,7 @@ components:
         document_encryption_key:
           type: string
           description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing doucment.
-          example: 5e0523acd9ec45f7d08295a029cc296f5cb5e713588c2e2b6fd95ed4a8a4b404
+          example: EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ=
       required:
         - document_guid
         - document_encryption_key
@@ -1464,13 +1464,13 @@ components:
       type: apiKey
       in: header
       name: X-Encryption-Key
-      description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing doucment.
+      description: AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing doucment.
 
     Parameter:
       type: apiKey
       in: query
       name: encryptionKey
-      description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing doucment.
+      description: AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing doucment.
 
     Device JWT:
       description: |

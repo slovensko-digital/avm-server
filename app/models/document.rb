@@ -1,12 +1,14 @@
 class Document < ApplicationRecord
   has_one_attached :encrypted_content
+  attr_accessor :decrypted_content
 
   def decrypt_content(key)
-    @decrypted_content = encrypted_content.download
-  end
-
-  def decrypted_content
-    Base64.strict_encode64(@decrypted_content)
+    decryptor = ActiveSupport::MessageEncryptor.new(key)
+    begin
+      @decrypted_content = Base64.strict_encode64(decryptor.decrypt_and_verify(encrypted_content.download).first)
+    rescue ActiveSupport::MessageEncryptor::InvalidMessage => e
+      raise AvmBadEncryptionKeyError.new
+    end
   end
 
   def decrypted_content_mimetype_b64
@@ -17,7 +19,11 @@ class Document < ApplicationRecord
     if mimetype.include?('base64')
       content = Base64.decode64(content)
     end
-    encrypted_content.attach(filename: filename, content_type: mimetype, io: StringIO.new(content))
+
+    encryptor = ActiveSupport::MessageEncryptor.new(key)
+    encrypted_data = encryptor.encrypt_and_sign(StringIO.new(content))
+
+    encrypted_content.attach(filename: filename, content_type: mimetype, io: StringIO.new(encrypted_data))
   end
 
   def validate_parameters(content)
