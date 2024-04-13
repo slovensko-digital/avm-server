@@ -53,6 +53,11 @@ class Api::V1::DocumentsController < ApplicationController
       begin
         @key = Base64.strict_decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
       rescue => e
+        puts "DEBUG ENCRYPTION KEY MALFORMED ====================="
+        puts request.headers.to_h['HTTP_X_ENCRYPTION_KEY']
+        puts params[:encryptionKey]
+        puts "DEBUG ====================="
+
         raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key Base64 decryption failed.", e.message)
       end
 
