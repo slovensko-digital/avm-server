@@ -5,7 +5,7 @@ class Document < ApplicationRecord
   def decrypt_content(key)
     decryptor = ActiveSupport::MessageEncryptor.new(key)
     begin
-      @decrypted_content = Base64.strict_encode64(decryptor.decrypt_and_verify(encrypted_content.download).first)
+      @decrypted_content = decryptor.decrypt_and_verify(encrypted_content.download)
     rescue ActiveSupport::MessageEncryptor::InvalidMessage => e
       raise AvmBadEncryptionKeyError.new
     end
@@ -21,7 +21,7 @@ class Document < ApplicationRecord
     end
 
     encryptor = ActiveSupport::MessageEncryptor.new(key)
-    encrypted_data = encryptor.encrypt_and_sign(StringIO.new(content))
+    encrypted_data = encryptor.encrypt_and_sign(Base64.strict_encode64(content))
 
     encrypted_content.attach(filename: filename, content_type: mimetype, io: StringIO.new(encrypted_data))
   end
