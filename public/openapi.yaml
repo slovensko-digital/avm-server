@@ -617,6 +617,8 @@ paths:
       parameters:
         - name: integration_id
           in: path
+          schema:
+            type: string
           description: Identifier of the integration
           example: 0d939eb1-8e14-41e5-9c7e-05e77641cc7b
           required: true
@@ -652,6 +654,8 @@ paths:
       parameters:
         - name: device_id
           in: path
+          schema:
+            type: string
           description: Identifier of the device
           example: 03de5319-a40d-48ea-b4fb-29d11e7017bb
           required: true
@@ -690,21 +694,29 @@ paths:
       parameters:
         - name: guid
           in: query
+          schema:
+            type: string
           description: GUID of a document
           example: e7e95411-66a1-d401-e063-0a64dbb6b796
           required: true
         - name: key
           in: query
+          schema:
+            type: string
           description: AES256 key in Base64 for the document
           example: EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ=
           required: true
         - name: pushkey
           in: query
+          schema:
+            type: string
           description: AES256 key in Base64 for push notification content
           example: R/rfN+z129w1H2iftbr1GOKXdC3OxSJU9PZeHs+W7ts=
           required: false
         - name: integration
           in: query
+          schema:
+            type: string
           description: 'JWT of source integration. Can be used to pair device with the integration. Must contain `aud: "device"` claim'
           example: eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiI3OGQ5MWRlNy0xY2MyLTQwZTQtOWE3MS0zODU4YjRmMDMxOWQiLCJleHAiOjE3MTI5MDk3MjAsImp0aSI6IjAwZTAxN2Y1LTI4MTAtNDkyNS04ODRlLWNiN2FhZDAzZDFhNiIsImF1ZCI6ImRldmljZSJ9.7Op6W2BvbX2_mgj9dkz1IiolEsQ1Z2a0AzpS5bj4pcG3CJ4Z8j9W3RQE95wrAj3t6nmd9JaGZSlCJNSV_myyLQ
           required: false
@@ -744,9 +756,15 @@ components:
           type: string
           description: Integration's ES256 public key that shall be used to authenticate its JWT tokens
           example: "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGoqUt0JPQgvvMhLNxFQkwOoClKxDK8D8oW+qmakxQuOJuy/V0uKPJbhRkEWz8WPFZCUXUr1LsD5E667h5StmLw==\n-----END PUBLIC KEY-----"
+        pushkey:
+          type: string
+          description: Integration's AES256 key in Base64 form that shall be used to encrypt notificaiton messages sent to device
+          example: "R/rfN+z129w1H2iftbr1GOKXdC3OxSJU9PZeHs+W7ts="
       required:
         - platform
         - display_name
+        - public_key
+        - pushkey
 
     PostIntegrationResponse:
       type: object
@@ -775,12 +793,13 @@ components:
           example: John's phone
         public_key:
           type: string
-          description: Device's ES256 public key that shall be used to authenticate its JWT tokens and also encrypt push notification data.
+          description: Device's ES256 public key that shall be used to authenticate its JWT tokens
           example: "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1iPVm0v/ZNM04587g10F54JVIrMZqWnlOXuGjOvcYsuweTYxuXafP8aJ6kIXe+jQhjeldm2mQZzSZ4ceLRq0yA==\n-----END PUBLIC KEY-----"
       required:
         - platform
         - registration_id
         - display_name
+        - public_key
 
     PostDeviceResponse:
       type: object
