@@ -682,6 +682,36 @@ paths:
       responses:
         200:
           description: OK
+      callbacks:
+        myEvent:
+          'FCM-notificaiton-SDK':
+            post:
+              description: |
+                This is a pseudo-description of data sent to subscibing device in `data` payload through Firebase Cloud Messaging.
+
+                `encrypted_message` conatins document GUID and its encryption key encrypted with AES256 pushkey shared between integration and device,
+
+                Encrpyted message JSON:
+                ```json
+                {
+                  "document_guid": "bfde97b4-ee27-47bc-97e2-5164ed96a92a",
+                  "key": "EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ="
+                }
+                ```
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      properties:
+                        encrypted_message:
+                          type: string
+                          example: ZhHZtgaDJpYtxZD6TIOQJzRgRFgQ...
+                      required:
+                        - message
+              responses:
+                200:
+                  description: OK
 
   /qr-code:
     get:
