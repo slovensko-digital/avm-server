@@ -16,6 +16,8 @@ class Document < ApplicationRecord
   end
 
   def encrypt_file(key, filename, mimetype, content)
+    filename, mimetype = create_filename_and_mimetype(filename, mimetype)
+
     if mimetype.include?('base64')
       content = Base64.decode64(content)
     end
@@ -65,5 +67,29 @@ class Document < ApplicationRecord
 
   def avm_service
     Avm::Environment.avm_api
+  end
+
+  def create_filename_and_mimetype(filename, mimetype)
+    return [filename, mimetype] if filename && mimetype
+
+    Mime::Type.register("application/vnd.etsi.asic-e+zip", "asice", [], [".sce"])
+    Mime::Type.register("application/vnd.etsi.asic-s+zip", "asics", [], [".scs"])
+    Mime::Type.register("application/vnd.gov.sk.xmldatacontainer+xml", "xdcf")
+    Mime::Type.register("application/msword", "doc")
+    Mime::Type.register("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx")
+    Mime::Type.register("application/vnd.ms-excel", "xls")
+    Mime::Type.register("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx")
+    Mime::Type.register("application/vnd.ms-powerpoint", "ppt")
+    Mime::Type.register("application/vnd.openxmlformats-officedocument.presentationml.presentation", "pptx")
+
+    unless filename
+      filename = 'document' + Mime::Type.lookup(mimetype).symbol.to_s
+    else
+      mimetype = Mime::Type.lookup_by_extension(File.extname(filename).downcase.gsub('.', '')).to_s
+      raise AvmServiceBadRequestError.new("Could not parse mimetype from \"#{filename}\"") if mimetype.empty?
+      mimetype += ';base64'
+    end
+
+    [filename, mimetype]
   end
 end

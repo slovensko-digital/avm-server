@@ -872,7 +872,7 @@ components:
           $ref: "#/components/schemas/SigningParameters"
         payloadMimeType:
           type: string
-          example: application/pdf;base64
+          example: text/plain;base64
           description: |
             MIME type for document content and signature parameters XSLT transformation and XSD schema.
             Binary files should be encoded using base64, e.g., `application/pdf;base64`.
@@ -1018,8 +1018,8 @@ components:
       properties:
         filename:
           type: string
-          description: Filename of the document
-          example: sample_document.pdf
+          description: Filename of the document. payloadMimeType must be provided if empty. Also, if payloadMimeType is empty, filename must be provided and mimetype must be understood from extension.
+          example: sample_document.txt
         content:
           type: string
           description: Base64 encrypted content of the document
@@ -1035,7 +1035,7 @@ components:
         level:
           type: string
           description: Signature level.
-          example: PAdES_BASELINE_B
+          example: XAdES_BASELINE_B
           enum:
             - PAdES_BASELINE_B
             - PAdES_BASELINE_T
@@ -1046,7 +1046,7 @@ components:
         container:
           type: string
           description: Type of Advanced Signature Container. Defaults to null - no container.
-          example:
+          example: ASiC-E
           enum:
             - ASiC-E
             - ASiC-S
@@ -1492,13 +1492,19 @@ components:
       type: apiKey
       in: header
       name: X-Encryption-Key
-      description: AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing doucment.
+      description: |
+        AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing doucment.
+
+        Example: `EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ=`
 
     Parameter:
       type: apiKey
       in: query
       name: encryptionKey
-      description: AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing doucment.
+      description: |
+        AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing doucment.
+
+        Example: `EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ=`
 
     Device JWT:
       description: |

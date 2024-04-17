@@ -51,9 +51,12 @@ class Api::V1::DocumentsController < ApplicationController
 
     def set_key
       begin
-        @key = Base64.urlsafe_decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
-        # TODO: use strict_decode64 - client must use "+/" insetad of "-_"
-        # @key = Base64.strict_decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
+        begin
+          # AVM app somehow sends urlsafe base64 even if its source code doesn't seem so
+          @key = Base64.urlsafe_decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
+        rescue ArgumentError
+          @key = Base64.strict_decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
+        end
       rescue => e
         raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key Base64 decryption failed.", e.message)
       end
@@ -74,8 +77,6 @@ class Api::V1::DocumentsController < ApplicationController
       params.require(:parameters)
       d = params.require(:document)
       d.require(:content)
-      d.require(:filename)
-      params.require(:payloadMimeType)
       params.permit(:encryptionKey, :payloadMimeType, :key, :document => [:filename, :content], :parameters => [:level, :container])
     end
 
