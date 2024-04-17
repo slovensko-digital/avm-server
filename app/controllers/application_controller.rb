@@ -30,4 +30,15 @@ class ApplicationController < ActionController::API
       details: "Provided encryption key failed to decrypt document."
     }, status: 403
   end
+
+  private
+
+  def render_bad_request(exception)
+    render status: :bad_request, json: { message: exception.message }
+  end
+
+  def render_unauthorized(key = "credentials")
+    headers['WWW-Authenticate'] = 'Token realm="API"'
+    render status: :unauthorized, json: { message: "Unauthorized " + key }
+  end
 end

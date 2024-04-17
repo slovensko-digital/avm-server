@@ -11,6 +11,12 @@ Rails.application.routes.draw do
           post 'sign'
         end
       end
+
+      resources :devices, only: [:create]
+      resources :integrations, only: [:create]
+      resources :device_integrations, path: '/device-integrations', only: [:index, :create, :destroy]
+      resources :integration_devices, path: '/integration-devices', only: [:index, :destroy]
+      resource :sign_request, path: '/sign-request', only: [:create]
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

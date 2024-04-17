@@ -8,7 +8,7 @@ require "active_storage/engine"
 Bundler.require(*Rails.groups)
 
 if ['development', 'test'].include? ENV['RAILS_ENV']
-  Dotenv::Railtie.load
+  Dotenv::Rails.load
 end
 
 module AutogramServer

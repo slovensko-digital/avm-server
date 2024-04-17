@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_16_154821) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_12_122434) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -43,8 +43,32 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_16_154821) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "devices", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "registration_id", null: false
+    t.string "platform", null: false
+    t.string "display_name", null: false
+    t.string "public_key", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "devices_integrations", id: false, force: :cascade do |t|
+    t.uuid "device_id", null: false
+    t.uuid "integration_id", null: false
+    t.index ["device_id", "integration_id"], name: "index_devices_integrations_on_device_id_and_integration_id", unique: true
+  end
+
   create_table "documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.json "parameters"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "integrations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "platform", null: false
+    t.string "display_name", null: false
+    t.string "public_key", null: false
+    t.string "pushkey", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
