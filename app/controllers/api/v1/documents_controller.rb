@@ -11,9 +11,11 @@ class Api::V1::DocumentsController < ApplicationController
   # POST /documents
   def create
     p = document_params
+    filename, mimetype = create_filename_and_mimetype(p[:document][:filename], p[:payload_mime_type])
+
     @document = Document.new(parameters: p[:parameters])
-    @document.encrypt_file(@key, p[:document][:filename], p[:payloadMimeType], p[:document][:content])
-    @document.validate_parameters(p[:document][:content])
+    @document.encrypt_file(@key, filename, mimetype, p[:document][:content])
+    @document.validate_parameters(p[:document][:content], mimetype)
 
     render json: @document.errors, status: :unprocessable_entity unless @document.save
   end
@@ -25,14 +27,14 @@ class Api::V1::DocumentsController < ApplicationController
 
   # POST /documents/1/datatosign
   def datatosign
-    @document.set_add_timestamp if datatosign_params[:addTimestamp]
-    @signing_certificate = datatosign_params.require(:signingCertificate)
+    @document.set_add_timestamp if datatosign_params[:add_timestamp]
+    @signing_certificate = datatosign_params.require(:signing_certificate)
     @result = @document.datatosign(@signing_certificate)
   end
 
   # POST /documents/1/sign
   def sign
-    @signer = @document.sign(@key, sign_params[:dataToSignStructure], sign_params[:signedData])
+    @signer = @document.sign(@key, sign_params[:data_to_sign_structure], sign_params[:signed_data])
     render json: @document.errors, status: :unprocessable_entity unless @signer
 
     @document = Document.find(params[:id])
@@ -50,12 +52,13 @@ class Api::V1::DocumentsController < ApplicationController
     end
 
     def set_key
+      key_b64 = request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryption_key]
       begin
         begin
           # AVM app somehow sends urlsafe base64 even if its source code doesn't seem so
-          @key = Base64.urlsafe_decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
+          @key = Base64.urlsafe_decode64(key_b64)
         rescue ArgumentError
-          @key = Base64.strict_decode64(request.headers.to_h['HTTP_X_ENCRYPTION_KEY'] || params[:encryptionKey])
+          @key = Base64.strict_decode64(key_b64)
         end
       rescue => e
         raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key Base64 decryption failed.", e.message)
@@ -77,20 +80,70 @@ class Api::V1::DocumentsController < ApplicationController
       params.require(:parameters)
       d = params.require(:document)
       d.require(:content)
-      params.permit(:encryptionKey, :payloadMimeType, :key, :document => [:filename, :content], :parameters => [:level, :container])
+      params.permit(
+        :encryption_key,
+        :payload_mime_type,
+        :document => [:filename, :content],
+        :parameters => [
+          :checkPDFACompliance,
+          :autoLoadEform,
+          :level,
+          :container,
+          :containerXmlns,
+          :embedUsedSchemas,
+          :identifier,
+          :packaging,
+          :digestAlgorithm,
+          :en319132,
+          :infoCanonicalization,
+          :propertiesCanonicalization,
+          :keyInfoCanonicalization,
+          :schema,
+          :schemaIdentifier,
+          :transformation,
+          :transformationIdentifier,
+          :transformationLanguage,
+          :transformationMediaDestinationTypeDescription,
+          :transformationTargetEnvironment
+        ]
+      )
     end
 
     def datatosign_params
-      params.permit(:encryptionKey, :id, :signingCertificate, :addTimestamp)
+      params.permit(:encryption_key, :id, :signing_certificate, :add_timestamp)
     end
 
     def sign_params
-      params.require(:signedData)
-      dts = params.require(:dataToSignStructure)
-      dts.require(:dataToSign)
-      dts.require(:signingTime)
-      dts.require(:signingCertificate)
+      params.require(:signed_data)
+      dts = params.require(:data_to_sign_structure)
+      dts.require(:data_to_sign)
+      dts.require(:signing_time)
+      dts.require(:signing_certificate)
 
-      params.permit(:encryptionKey, :id, :signedData, :returnSignedDocument, :dataToSignStructure => [:dataToSign, :signingTime, :signingCertificate])
+      params.permit(:encryption_key, :id, :signed_data, :return_signed_document, :data_to_sign_structure => [:data_to_sign, :signing_time, :signing_certificate])
+    end
+
+    def create_filename_and_mimetype(filename, mimetype)
+      return [filename, mimetype] if filename && mimetype
+
+      Mime::Type.register("application/vnd.etsi.asic-e+zip", "asice", [], [".sce"])
+      Mime::Type.register("application/vnd.etsi.asic-s+zip", "asics", [], [".scs"])
+      Mime::Type.register("application/vnd.gov.sk.xmldatacontainer+xml", "xdcf")
+      Mime::Type.register("application/msword", "doc")
+      Mime::Type.register("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx")
+      Mime::Type.register("application/vnd.ms-excel", "xls")
+      Mime::Type.register("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx")
+      Mime::Type.register("application/vnd.ms-powerpoint", "ppt")
+      Mime::Type.register("application/vnd.openxmlformats-officedocument.presentationml.presentation", "pptx")
+
+      unless filename
+        filename = 'document.' + Mime::Type.lookup(mimetype).symbol.to_s
+      else
+        mimetype = Mime::Type.lookup_by_extension(File.extname(filename).downcase.gsub('.', '')).to_s
+        raise AvmServiceBadRequestError.new("Could not parse mimetype from \"#{filename}\"") if mimetype.empty?
+        mimetype += ';base64'
+      end
+
+      [filename, mimetype]
     end
 end

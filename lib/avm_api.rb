@@ -3,14 +3,14 @@ class AvmApi
     @host = host
   end
 
-  def validate_parameters(document, content)
+  def validate_parameters(document, content, mimetype)
     response = Faraday.post(url('/parameters/validate'), {
       document: {
         filename: document.encrypted_content.filename,
         content: content
       },
       parameters: document.parameters,
-      payloadMimeType: document.decrypted_content_mimetype_b64
+      payloadMimeType: mimetype
     }.to_json)
 
     handle_response(response)

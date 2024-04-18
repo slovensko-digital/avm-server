@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::API
+  before_action :transform_params
+
   rescue_from ActionController::ParameterMissing do |e|
     render json: {
       code: "PARAMETER_MISSING",
@@ -40,5 +42,9 @@ class ApplicationController < ActionController::API
   def render_unauthorized(key = "credentials")
     headers['WWW-Authenticate'] = 'Token realm="API"'
     render status: :unauthorized, json: { message: "Unauthorized " + key }
+  end
+
+  def transform_params
+    request.parameters.transform_keys!(&:underscore)
   end
 end

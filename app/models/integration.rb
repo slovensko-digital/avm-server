@@ -19,7 +19,11 @@ class Integration < ApplicationRecord
 
   def public_key_format_should_be_valid
     begin
-      OpenSSL::PKey::EC.new(public_key)
+      begin
+        OpenSSL::PKey::EC.new(public_key)
+      rescue
+        OpenSSL::PKey::EC.new("-----BEGIN PUBLIC KEY-----\n#{public_key}\n-----END PUBLIC KEY-----")
+      end
     rescue OpenSSL::PKey::ECError => e
       errors.add(:public_key, e.message)
     end

@@ -6,6 +6,6 @@ class Api::V1::IntegrationsController < ApiController
   private
 
   def integration_params
-    params.permit(:display_name, :platform, :public_key)
+    params.permit(:display_name, :platform, :public_key, :pushkey)
   end
 end
