@@ -116,11 +116,11 @@ class Api::V1::DocumentsController < ApplicationController
     def sign_params
       params.require(:signed_data)
       dts = params.require(:data_to_sign_structure)
-      dts.require(:data_to_sign)
-      dts.require(:signing_time)
-      dts.require(:signing_certificate)
+      dts.require(:dataToSign)
+      dts.require(:signingTime)
+      dts.require(:signingCertificate)
 
-      params.permit(:encryption_key, :id, :signed_data, :return_signed_document, :data_to_sign_structure => [:data_to_sign, :signing_time, :signing_certificate])
+      params.permit(:encryption_key, :id, :signed_data, :return_signed_document, :data_to_sign_structure => [:dataToSign, :signingTime, :signingCertificate])
     end
 
     def create_filename_and_mimetype(filename, mimetype)
