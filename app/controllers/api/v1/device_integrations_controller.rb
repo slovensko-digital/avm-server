@@ -2,7 +2,7 @@ class Api::V1::DeviceIntegrationsController < ApiController
   before_action :set_device
 
   def create
-    integration = ApiEnvironment.integration_token_authenticator.verify_token(params.require(:integration_pairing_token), expected_aud: 'device')
+    integration = ApiEnvironment.integration_token_authenticator.verify_token(params.require(:integration_pairing_token), expected_aud: 'device', max_exp_in: 24.hours)
     @device.integrations << integration
 
     head 204
