@@ -1533,6 +1533,7 @@ components:
             - EMPTY_BODY
             - DATATOSIGN_MISMATCH
             - CERTIFICATE_NOT_VALID
+            - FAILED_PARSING_MIMETYPE
           description: |
             Code that can be used to identify the error.
             

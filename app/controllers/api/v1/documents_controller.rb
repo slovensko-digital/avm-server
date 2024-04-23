@@ -140,7 +140,7 @@ class Api::V1::DocumentsController < ApplicationController
         filename = 'document.' + Mime::Type.lookup(mimetype).symbol.to_s
       else
         mimetype = Mime::Type.lookup_by_extension(File.extname(filename).downcase.gsub('.', '')).to_s
-        raise AvmServiceBadRequestError.new("Could not parse mimetype from \"#{filename}\"") if mimetype.empty?
+        raise AvmServiceBadRequestError.new({code: "FAILED_PARSING_MIMETYPE", message: "Could not parse mimetype", details: "Could not parse mimetype from: #{filename}"}.to_json) if mimetype.empty?
         mimetype += ';base64'
       end
 
