@@ -611,7 +611,7 @@ paths:
         - Integration
       security:
         - Device JWT: []
-      summary: Integration retrieves a list of paired devices
+      summary: Device retrieves a list of paired integrations
       responses:
         200:
           description: OK
@@ -626,7 +626,7 @@ paths:
         - Integration
       security:
         - Device JWT: []
-      summary: Integration deletes device from its subscribers
+      summary: Device deletes integration from its paired integrations
       parameters:
         - name: integration_id
           in: path
@@ -648,7 +648,7 @@ paths:
         - Integration
       security:
         - Integration JWT: []
-      summary: Integration retrieves a list of connected devices
+      summary: Integration retrieves a list of paired devices
       responses:
         200:
           description: OK
@@ -663,7 +663,7 @@ paths:
         - Integration
       security:
         - Integration JWT: []
-      summary: Integration deletes device from its subscribers
+      summary: Integration deletes device from its paired devices
       parameters:
         - name: device_id
           in: path
