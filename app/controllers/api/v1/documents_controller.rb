@@ -5,6 +5,12 @@ class Api::V1::DocumentsController < ApplicationController
 
   # GET /documents/1
   def show
+    modified_since = request.headers.to_h['HTTP_IF_MODIFIED_SINCE']
+
+    if modified_since && Time.zone.parse(modified_since) >= @document.updated_at
+      response.set_header('Last-Modified', @document.created_at + 1.seconds)
+      render json: nil, status: 304
+    end
     @signers = @document.signers
   end
 
@@ -17,7 +23,11 @@ class Api::V1::DocumentsController < ApplicationController
     @document.encrypt_file(@key, filename, mimetype, p[:document][:content])
     @document.validate_parameters(p[:document][:content], mimetype)
 
-    render json: @document.errors, status: :unprocessable_entity unless @document.save
+    unless @document.save
+      render json: @document.errors, status: :unprocessable_entity
+    else
+      response.set_header('Last-Modified', @document.created_at + 1.seconds)
+    end
   end
 
   # POST /documents/1/visualization
