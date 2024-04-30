@@ -1,5 +1,5 @@
 class Api::V1::DocumentsController < ApplicationController
-  before_action :set_document, only: %i[ show datatosign sign visualization destroy ]
+  before_action :set_document, only: %i[ show datatosign sign visualization destroy signature_level ]
   before_action :set_key, only: %i[ show create datatosign sign visualization ]
   before_action :decrypt_document_content, only: %i[ show sign datatosign visualization destroy]
 
@@ -54,6 +54,12 @@ class Api::V1::DocumentsController < ApplicationController
   # DELETE /documents/1
   def destroy
     @document.destroy!
+  end
+
+  # GET /documents/1/signature-level
+  def signature_level
+    puts @document.parameters
+    @level = @document.parameters.fetch("level", nil)
   end
 
   private
