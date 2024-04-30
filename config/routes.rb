@@ -9,7 +9,7 @@ Rails.application.routes.draw do
           get 'visualization'
           post 'datatosign'
           post 'sign'
-          get 'signature-level'
+          get 'parameters'
         end
       end
 

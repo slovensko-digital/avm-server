@@ -316,14 +316,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/BadGatewayErrorResponseBody"
 
-  /documents/{guid}/signature-level:
+  /documents/{guid}/parameters:
     get:
       tags:
         - Desktop2App - Client
       security:
         - Header: [ ]
         - Parameter: [ ]
-      summary: Client app gets the value of signature-level parameter to show the right information to the user
+      summary: Client app gets the signature parameters of the doucment
       parameters:
         - name: guid
           in: path
@@ -344,7 +344,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: "#/components/schemas/SignatureLevelResponse"
+                $ref: "#/components/schemas/SigningParameters"
         401:
           description: EncryptionKey not provided
           content:
