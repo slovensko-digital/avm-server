@@ -2,6 +2,15 @@ class Document < ApplicationRecord
   has_one_attached :encrypted_content
   attr_accessor :decrypted_content
 
+  def self.convert_to_b64(mimetype, content, params)
+    return [mimetype, content, params] if mimetype.include?('base64')
+
+    params[:schema] = Base64.strict_encode64(params[:schema]) if params[:schema]
+    params[:transformation] = Base64.strict_encode64(params[:transformation]) if params[:transformation]
+
+    [mimetype + ';base64', Base64.strict_encode64(content), params]
+  end
+
   def decrypt_content(key)
     decryptor = ActiveSupport::MessageEncryptor.new(key)
     begin
@@ -16,12 +25,8 @@ class Document < ApplicationRecord
   end
 
   def encrypt_file(key, filename, mimetype, content)
-    if mimetype.include?('base64')
-      content = Base64.decode64(content)
-    end
-
     encryptor = ActiveSupport::MessageEncryptor.new(key)
-    encrypted_data = encryptor.encrypt_and_sign(Base64.strict_encode64(content))
+    encrypted_data = encryptor.encrypt_and_sign(Base64.strict_encode64(Base64.decode64(content)))
 
     encrypted_content.attach(filename: filename, content_type: mimetype, io: StringIO.new(encrypted_data))
   end

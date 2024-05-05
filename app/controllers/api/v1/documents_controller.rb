@@ -18,10 +18,11 @@ class Api::V1::DocumentsController < ApplicationController
   def create
     p = document_params
     filename, mimetype = create_filename_and_mimetype(p[:document][:filename], p[:payload_mime_type])
+    mimetype, content, parameters = Document.convert_to_b64(mimetype, p[:document][:content], p[:parameters])
 
-    @document = Document.new(parameters: p[:parameters])
-    @document.encrypt_file(@key, filename, mimetype, p[:document][:content])
-    @document.validate_parameters(p[:document][:content], mimetype)
+    @document = Document.new(parameters: parameters)
+    @document.encrypt_file(@key, filename, mimetype, content)
+    @document.validate_parameters(content, mimetype)
 
     unless @document.save
       render json: @document.errors, status: :unprocessable_entity
@@ -155,7 +156,6 @@ class Api::V1::DocumentsController < ApplicationController
       else
         mimetype = Mime::Type.lookup_by_extension(File.extname(filename).downcase.gsub('.', '')).to_s
         raise AvmServiceBadRequestError.new({code: "FAILED_PARSING_MIMETYPE", message: "Could not parse mimetype", details: "Could not parse mimetype from: #{filename}"}.to_json) if mimetype.empty?
-        mimetype += ';base64'
       end
 
       [filename, mimetype]
