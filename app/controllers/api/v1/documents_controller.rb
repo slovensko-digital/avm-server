@@ -1,17 +1,22 @@
 class Api::V1::DocumentsController < ApplicationController
   before_action :set_document, only: %i[ show datatosign sign visualization destroy parameters ]
-  before_action :set_key, only: %i[ show create datatosign sign visualization ]
-  before_action :decrypt_document_content, only: %i[ show sign datatosign visualization destroy]
+  before_action :set_key, only: %i[ create datatosign sign visualization ]
+  before_action :decrypt_document_content, only: %i[ sign datatosign visualization destroy]
 
   # GET /documents/1
   def show
     modified_since = request.headers.to_h['HTTP_IF_MODIFIED_SINCE']
 
+    response.set_header('Last-Modified', @document.created_at + 1.seconds)
     if modified_since && Time.zone.parse(modified_since) >= @document.updated_at
-      response.set_header('Last-Modified', @document.created_at + 1.seconds)
       render json: nil, status: 304
+    else
+      # expecting 1s polling on this operation
+      set_key
+      decrypt_document_content
+
+      @signers = @document.signers
     end
-    @signers = @document.signers
   end
 
   # POST /documents

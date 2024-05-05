@@ -106,7 +106,7 @@ paths:
         - Header: [ ]
         - Parameter: [ ]
       summary: External system requests signed document at the end of the process.
-      description: This endpoint is also designed for polling with the `If-Modified-Since` header (`TODO`).
+      description: This endpoint is also designed for polling with the `If-Modified-Since` header.
       parameters:
         - name: guid
           in: path
@@ -119,8 +119,7 @@ paths:
           required: false
           schema:
             type: string
-            # pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
-            example: 'Tue, 15 Oct 2019 12:45:26 GMT'
+            example: '2024-05-05 11:52:06 UTC'
         - name: Accept
           in: header
           schema:
@@ -139,17 +138,15 @@ paths:
             Last-Modified:
               schema:
                 type: string
-                pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
-                example: 'Tue, 15 Oct 2019 12:45:26 GMT'
-              description: "`TODO` Datetime of the last-modified attribute of the requeste document."
+                example: '2024-05-05 11:52:06 UTC'
+              description: "Datetime of the last-modified attribute of the requeste document."
         304:
           description: Requested document has not been modified since `If-Modified-Since` header
           headers:
             Last-Modified:
               schema:
                 type: string
-                pattern: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$'
-                example: 'Tue, 15 Oct 2019 12:45:26 GMT'
+                example: '2024-05-05 11:52:06 UTC'
               description: Datetime of the last-modified attribute of the requeste document.
         400:
           description: Bad request
