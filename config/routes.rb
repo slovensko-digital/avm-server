@@ -20,6 +20,8 @@ Rails.application.routes.draw do
       resource :sign_request, path: '/sign-request', only: [:create]
     end
   end
+
+  get '/apple-app-site-association' => 'apple#apple_app_site_association'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
