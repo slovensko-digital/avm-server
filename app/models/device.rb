@@ -45,7 +45,7 @@ class Device < ApplicationRecord
   end
 
   def encrypt_message(message, key)
-    encryptor = ActiveSupport::MessageEncryptor.new(key)
+    encryptor = ActiveSupport::MessageEncryptor.new(Base64.decode64 key)
     encryptor.encrypt_and_sign(message)
   end
 end
