@@ -3,6 +3,7 @@ class Api::V1::SignRequestsController < ApiController
 
   def create
     @integration.notify_devices(params.require(:document_guid), params.require(:document_encryption_key))
+    render json: {}, status: 200
   end
 
   private
