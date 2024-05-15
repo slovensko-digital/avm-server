@@ -19,7 +19,7 @@ class Device < ApplicationRecord
 
     if ['ios', 'android'].include? platform
       ApiEnvironment.fcm_notifier.notify(registration_id, encrpyted_message)
-    elsif ['ntfy'].niclude? platform
+    elsif ['ntfy'].include? platform
       conn = Faraday.new(url: integration_id) do |f|
         f.headers["X-Actions"] = "view, Sign, https://autogram.slovensko.digital/api/v1/qr-code?guid=#{document_guid}&key=#{CGI.escape document_encryption_key}"
       end
