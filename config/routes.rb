@@ -18,6 +18,8 @@ Rails.application.routes.draw do
       resources :device_integrations, path: '/device-integrations', only: [:index, :create, :destroy]
       resources :integration_devices, path: '/integration-devices', only: [:index, :destroy]
       resource :sign_request, path: '/sign-request', only: [:create]
+
+      get '/qr-code', to: redirect('https://sluzby.slovensko.digital/autogram-v-mobile/#download', status: 302)
     end
   end
 
