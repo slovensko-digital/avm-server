@@ -64,7 +64,7 @@ class Document < ApplicationRecord
 
     document = response['documentResponse']
     encrypt_file(key, document.dig('filename'), document['mimeType'], document['content'])
-    last_signed_at = Time.current
+    self.last_signed_at = Time.current
     save!
 
     response['signer']
