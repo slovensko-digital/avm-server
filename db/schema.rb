@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_22_052823) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_10_211535) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -62,6 +62,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_22_052823) do
     t.json "parameters"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "last_signed_at", null: false
   end
 
   create_table "good_job_batches", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

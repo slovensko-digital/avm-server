@@ -2,6 +2,8 @@ class Document < ApplicationRecord
   has_one_attached :encrypted_content
   attr_accessor :decrypted_content
 
+  before_create :set_last_signed_at
+
   def self.convert_to_b64(mimetype, content, params)
     return [mimetype, content, params] if mimetype.include?('base64')
 
@@ -62,11 +64,16 @@ class Document < ApplicationRecord
 
     document = response['documentResponse']
     encrypt_file(key, document.dig('filename'), document['mimeType'], document['content'])
+    last_signed_at = Time.current
 
     response['signer']
   end
 
   private
+
+  def set_last_signed_at
+    self.last_signed_at = self.created_at
+  end
 
   def avm_service
     Avm::Environment.avm_api

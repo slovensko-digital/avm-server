@@ -7,8 +7,8 @@ class Api::V1::DocumentsController < ApplicationController
   def show
     modified_since = request.headers.to_h['HTTP_IF_MODIFIED_SINCE']
 
-    response.set_header('Last-Modified', @document.created_at + 1.seconds)
-    if modified_since && Time.zone.parse(modified_since) >= @document.updated_at
+    response.set_header('Last-Modified', @document.last_signed_at + 1.seconds)
+    if modified_since && Time.zone.parse(modified_since) >= @document.last_signed_at
       render json: nil, status: 304
     else
       # expecting 1s polling on this operation
@@ -32,7 +32,7 @@ class Api::V1::DocumentsController < ApplicationController
     unless @document.save
       render json: @document.errors, status: :unprocessable_entity
     else
-      response.set_header('Last-Modified', @document.created_at + 1.seconds)
+      response.set_header('Last-Modified', @document.last_signed_at + 1.seconds)
     end
   end
 
