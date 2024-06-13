@@ -10,12 +10,18 @@ class Device < ApplicationRecord
 
 
   def notify(integration, document_guid, document_encryption_key)
-    encrpyted_message = encrypt_message({
+    # TODO: encrypt notifications
+    # encrpyted_message = encrypt_message({
+    #     document_guid: document_guid,
+    #     key: document_encryption_key
+    #   }.to_json,
+    #   integration.pushkey
+    # )
+
+    encrpyted_message = {
         document_guid: document_guid,
         key: document_encryption_key
-      }.to_json,
-      integration.pushkey
-    )
+      }.to_json
 
     if ['ios', 'android'].include? platform
       ApiEnvironment.fcm_notifier.notify(registration_id, encrpyted_message)
