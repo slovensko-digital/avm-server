@@ -1,10 +1,16 @@
 class ApplicationController < ActionController::API
+  before_action :transform_params
+
   rescue_from ActionController::ParameterMissing do |e|
     render json: {
       code: "PARAMETER_MISSING",
       message: "Required parameter is missing.",
       details: e.message
     }, status: 400
+  end
+
+  rescue_from AvmServiceSignatureNotInTactError do |e|
+    render json: JSON.parse(e.message), status: 409
   end
 
   rescue_from AvmServiceBadRequestError do |e|
@@ -29,5 +35,20 @@ class ApplicationController < ActionController::API
       message: "Encryption key mismatch.",
       details: "Provided encryption key failed to decrypt document."
     }, status: 403
+  end
+
+  private
+
+  def render_bad_request(exception)
+    render status: :bad_request, json: { message: exception.message }
+  end
+
+  def render_unauthorized(key = "credentials")
+    headers['WWW-Authenticate'] = 'Token realm="API"'
+    render status: :unauthorized, json: { message: "Unauthorized " + key }
+  end
+
+  def transform_params
+    request.parameters.transform_keys!(&:underscore)
   end
 end

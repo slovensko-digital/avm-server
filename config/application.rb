@@ -8,7 +8,7 @@ require "active_storage/engine"
 Bundler.require(*Rails.groups)
 
 if ['development', 'test'].include? ENV['RAILS_ENV']
-  Dotenv::Railtie.load
+  Dotenv::Rails.load
 end
 
 module AutogramServer
@@ -37,5 +37,29 @@ module AutogramServer
     config.exceptions_app = self.routes
 
     Rails.application.config.generators { |g| g.orm :active_record, primary_key_type: :uuid }
+
+    config.active_record.encryption.primary_key = ENV['ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY']
+    config.active_record.encryption.deterministic_key = ENV['ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY']
+    config.active_record.encryption.key_derivation_salt = ENV['ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT']
+
+    config.active_job.queue_adapter = :good_job
+    config.good_job.max_threads = 2
+    config.good_job.execution_mode = :async
+    config.good_job.enable_cron = true
+    config.good_job.smaller_number_is_higher_priority = true
+
+    config.good_job.cron = {
+      delete_expired_documents: {
+        cron: "*/15 * * * *",
+        class: "DeleteExpiredDocumentsJob",
+        set: {priority: -5}
+      },
+      delete_expired_tokens: {
+        cron: "*/15 * * * *",
+        class: "DeleteExpiredTokensJob",
+        set: {priority: -10}
+      }
+    }
+
   end
 end

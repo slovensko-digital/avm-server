@@ -9,10 +9,21 @@ Rails.application.routes.draw do
           get 'visualization'
           post 'datatosign'
           post 'sign'
+          get 'parameters'
         end
       end
+
+      resources :devices, only: [:create]
+      resources :integrations, only: [:create]
+      resources :device_integrations, path: '/device-integrations', only: [:index, :create, :destroy]
+      resources :integration_devices, path: '/integration-devices', only: [:index, :destroy]
+      resource :sign_request, path: '/sign-request', only: [:create]
+
+      get '/qr-code', to: redirect('https://sluzby.slovensko.digital/autogram-v-mobile/#download', status: 302)
     end
   end
+
+  get '/apple-app-site-association' => 'apple#apple_app_site_association'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

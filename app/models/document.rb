@@ -1,12 +1,25 @@
 class Document < ApplicationRecord
   has_one_attached :encrypted_content
+  attr_accessor :decrypted_content
 
-  def decrypt_content(key)
-    @decrypted_content = encrypted_content.download
+  before_create :set_last_signed_at
+
+  def self.convert_to_b64(mimetype, content, params)
+    return [mimetype, content, params] if mimetype.include?('base64')
+
+    params[:schema] = Base64.strict_encode64(params[:schema]) if params[:schema]
+    params[:transformation] = Base64.strict_encode64(params[:transformation]) if params[:transformation]
+
+    [mimetype + ';base64', Base64.strict_encode64(content), params]
   end
 
-  def decrypted_content
-    Base64.strict_encode64(@decrypted_content)
+  def decrypt_content(key)
+    decryptor = ActiveSupport::MessageEncryptor.new(key)
+    begin
+      @decrypted_content = decryptor.decrypt_and_verify(encrypted_content.download)
+    rescue ActiveSupport::MessageEncryptor::InvalidMessage => e
+      raise AvmBadEncryptionKeyError.new
+    end
   end
 
   def decrypted_content_mimetype_b64
@@ -14,14 +27,14 @@ class Document < ApplicationRecord
   end
 
   def encrypt_file(key, filename, mimetype, content)
-    if mimetype.include?('base64')
-      content = Base64.decode64(content)
-    end
-    encrypted_content.attach(filename: filename, content_type: mimetype, io: StringIO.new(content))
+    encryptor = ActiveSupport::MessageEncryptor.new(key)
+    encrypted_data = encryptor.encrypt_and_sign(Base64.strict_encode64(Base64.decode64(content)))
+
+    encrypted_content.attach(filename: filename, content_type: mimetype, io: StringIO.new(encrypted_data))
   end
 
-  def validate_parameters(content)
-    avm_service.validate_parameters(self, content)
+  def validate_parameters(content, mimetype)
+    avm_service.validate_parameters(self, content, mimetype)
   end
 
   def signers
@@ -51,11 +64,17 @@ class Document < ApplicationRecord
 
     document = response['documentResponse']
     encrypt_file(key, document.dig('filename'), document['mimeType'], document['content'])
+    self.last_signed_at = Time.current
+    save!
 
     response['signer']
   end
 
   private
+
+  def set_last_signed_at
+    self.last_signed_at = self.created_at
+  end
 
   def avm_service
     Avm::Environment.avm_api
