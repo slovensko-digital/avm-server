@@ -81,7 +81,7 @@ class Api::V1::DocumentsController < ApplicationController
           @key = Base64.strict_decode64(key_b64)
         end
       rescue => e
-        raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key Base64 decryption failed.", e.message)
+        raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key Base64 decryption failed.", "Encryption key must be a base64 string encoding 32 bytes long key, but was: \"#{key_b64}\"")
       end
 
       raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MISSING", "Encryption key not provided.", "Encryption key must be provided either in X-Encryption-Key header or as encryptionKey query parameter.") unless @key
