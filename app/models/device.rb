@@ -16,14 +16,14 @@ class Device < ApplicationRecord
     # TODO: encrypt notifications
     # encrpyted_message = encrypt_message({
     #     document_guid: document_guid,
-    #     key: document_encryption_key
+    #     documentEncryptionKey: document_encryption_key
     #   }.to_json,
     #   pushkey
     # )
 
     encrpyted_message = {
         document_guid: document_guid,
-        key: document_encryption_key
+        documentEncryptionKey: document_encryption_key
       }.to_json
 
     if ['ios', 'android'].include? platform
