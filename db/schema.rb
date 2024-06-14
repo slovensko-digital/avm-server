@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_10_211535) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_14_081455) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -50,6 +50,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_10_211535) do
     t.string "public_key", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "pushkey", null: false
   end
 
   create_table "devices_integrations", id: false, force: :cascade do |t|
@@ -149,7 +150,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_10_211535) do
     t.string "platform", null: false
     t.string "display_name", null: false
     t.string "public_key", null: false
-    t.string "pushkey", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
