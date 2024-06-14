@@ -2,25 +2,28 @@ class Device < ApplicationRecord
   has_many :devices_integrations
   has_many :integrations, -> { distinct }, through: :devices_integrations
 
+  encrypts :pushkey
+
   validates :platform, presence: true
   validates :display_name, presence: true
   validates :registration_id, presence: true
   validates :public_key, presence: true
+  validates :pushkey, presence: true
   validate :public_key_format_should_be_valid
 
 
-  def notify(integration, document_guid, document_encryption_key)
+  def notify(document_guid, document_encryption_key)
     # TODO: encrypt notifications
     # encrpyted_message = encrypt_message({
     #     document_guid: document_guid,
-    #     key: document_encryption_key
+    #     documentEncryptionKey: document_encryption_key
     #   }.to_json,
-    #   integration.pushkey
+    #   pushkey
     # )
 
     encrpyted_message = {
         document_guid: document_guid,
-        key: document_encryption_key
+        documentEncryptionKey: document_encryption_key
       }.to_json
 
     if ['ios', 'android'].include? platform
@@ -47,6 +50,21 @@ class Device < ApplicationRecord
       end
     rescue OpenSSL::PKey::ECError => e
       errors.add(:public_key, e.message)
+    end
+  end
+
+  def pushkey_format_should_be_vakud
+    begin
+      key = nil
+      begin
+        key = Base64.urlsafe_decode64(pushkey)
+      rescue ArgumentError
+        key = Base64.strict_decode64(pushkey)
+      end
+
+      errors.add(:pushkey, "aes256 key must be 32 bytes long") unless key.length == 32
+    rescue => e
+      errors.add(:pushkey, e.message)
     end
   end
 
