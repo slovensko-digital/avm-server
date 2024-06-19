@@ -2,7 +2,7 @@
 
 Ruby on Rails REST API server pre aplikáciu [Autogram v mobile](https://github.com/slovensko-digital/avm-app-flutter). Link na swagger [API dokumentáciu](https://autogram.slovensko.digital/api/v1).
 
-[Autogram v mobile](https://sluzby.slovensko.digital/autogram-v-mobile/) vytvorili freevision s.r.o., Služby Slovensko.Digital s.r.o. a dobrovoľníkmi pod EUPL-1.2 licenciou. Prevádzkovateľom je Služby Slovensko.Digital s.r.o.. Prípadné issues riešime v [GitHub projekte](https://github.com/orgs/slovensko-digital/projects/5) alebo rovno v tomto repozitári.
+[Autogram v mobile](https://sluzby.slovensko.digital/autogram-v-mobile/) vytvorili freevision s.r.o., Služby Slovensko.Digital s.r.o. a dobrovoľníci pod EUPL-1.2 licenciou. Prevádzkovateľom je Služby Slovensko.Digital s.r.o.. Prípadné issues riešime v [GitHub projekte](https://github.com/orgs/slovensko-digital/projects/5) alebo rovno v tomto repozitári. Java komponent [AVM service](https://github.com/slovensko-digital/avm-service) je z veľkej časti vyrobený podľa projektu [Autogram](https://github.com/slovensko-digital/autogram), ktorého autormi sú Jakub Ďuraš, Solver IT s.r.o., Slovensko.Digital, CRYSTAL CONSULTING, s.r.o. a ďalší spoluautori.
 
 Projekt sa skladá z viacerých častí:
 - **Server**
