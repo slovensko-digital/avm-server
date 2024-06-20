@@ -37,6 +37,9 @@ module AutogramServer
     config.exceptions_app = self.routes
 
     Rails.application.config.generators { |g| g.orm :active_record, primary_key_type: :uuid }
+    Rails.application.config.filter_parameters += [
+      :encryption_key, :document, :parameters, :signing_certificate, :signed_data, :data_to_sign_structure, :registration_id, :pushkey
+    ]
 
     config.active_record.encryption.primary_key = ENV['ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY']
     config.active_record.encryption.deterministic_key = ENV['ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY']
