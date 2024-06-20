@@ -19,6 +19,11 @@ readinessProbe:
   timeoutSeconds: 10
   probeType: "httpGet"
   path: "/up"
+resources:
+  requests:
+    memory: 1500Mi
+  limits:
+    memory: 2Gi
 persistence:
   enabled: true
   volumes:
