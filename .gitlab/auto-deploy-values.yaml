@@ -21,9 +21,9 @@ readinessProbe:
   path: "/up"
 resources:
   requests:
-    memory: 1500Mi
-  limits:
     memory: 2Gi
+  limits:
+    memory: 3Gi
 persistence:
   enabled: true
   volumes:
