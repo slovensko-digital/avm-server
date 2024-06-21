@@ -31,5 +31,5 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Defines the root path route ("/")
-  root to: redirect('https://sluzby.slovensko.digital/autogram/', status: 302)
+  root to: redirect(ENV.fetch("ROOT_URL_REDIRECT", "/api/v1/"), status: 302)
 end
