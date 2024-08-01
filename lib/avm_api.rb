@@ -28,7 +28,9 @@ class AvmApi
 
     handle_response(response)
 
-    JSON.parse(response.body)
+    r = JSON.parse(response.body)
+    r['mimeType'] = r['mimeType'].gsub(/ +charset=UTF-8;/, '')
+    r
   end
 
   def datatosign(document, signing_certificate)
