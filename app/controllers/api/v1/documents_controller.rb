@@ -98,8 +98,10 @@ class Api::V1::DocumentsController < ApplicationController
 
     def document_params
       params.require(:parameters)
-      d = params.require(:document)
-      d.require(:content)
+      params.require(:document).require(:content)
+
+      params[:parameters][:autoLoadEform] = true unless params[:parameters][:containerXmlns]
+
       params.permit(
         :encryption_key,
         :payload_mime_type,
