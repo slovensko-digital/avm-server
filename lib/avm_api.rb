@@ -4,7 +4,7 @@ class AvmApi
   end
 
   def validate_parameters(document, content, mimetype)
-    response = Faraday.post(url('/parameters/validate'), {
+    response = Faraday.post(url('/visualization'), {
       document: {
         filename: document.encrypted_content.filename,
         content: content
