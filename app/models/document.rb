@@ -37,13 +37,21 @@ class Document < ApplicationRecord
     avm_service.validate_parameters(self, content, mimetype)
   end
 
+  def signature_validation
+    avm_service.validate self
+  end
+
   def signers
-    [
-      {
-        "signedBy": "SERIALNUMBER=PNOSK-1234567890, C=SK, L=Bratislava, SURNAME=Smith, GIVENNAME=John, CN=John Smith",
-        "issuedBy": "CN=SVK eID ACA2, O=Disig a.s., OID.2.5.4.97=NTRSK-12345678, L=Bratislava, C=SK"
-      }
-    ]
+    begin
+      signature_validation['signatures'].map do |signature|
+        {
+          signedBy: signature['signingCertificate']['subjectDN'],
+          issuedBy: signature['signingCertificate']['issuerDN']
+        }
+      end
+    rescue AvmServiceDocumentNotSignedError
+      []
+    end
   end
 
   def visualization
@@ -51,7 +59,8 @@ class Document < ApplicationRecord
   end
 
   def set_add_timestamp
-    parameters['level'] = parameters['level'].gsub(/BASELINE_B/, 'BASELINE_T')
+    parameters['level'] = parameters['level'].gsub(/BASELINE_B/, 'BASELINE_T') if parameters['level']
+    parameters['level'] = 'T' unless parameters['level']
     save!
   end
 

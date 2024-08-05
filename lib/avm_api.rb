@@ -16,6 +16,16 @@ class AvmApi
     handle_response(response)
   end
 
+  def validate(document)
+    response = Faraday.post(url('/validate'), {
+        content: document.decrypted_content
+    }.to_json)
+
+    handle_response(response)
+
+    JSON.parse(response.body)
+  end
+
   def visualization(document)
     response = Faraday.post(url('/visualization'), {
       document: {
@@ -79,6 +89,7 @@ class AvmApi
   def handle_response(response)
     raise AvmServiceInternalError.new(response.body) if response.status >= 500
     raise AvmServiceSignatureNotInTactError.new(response.body) if (response.status == 400 && JSON.parse(response.body)['code'] == 'SIGNATURE_NOT_IN_TACT')
+    raise AvmServiceDocumentNotSignedError.new(response.body) if (response.status == 422 && JSON.parse(response.body)['code'] == 'DOCUMENT_NOT_SIGNED')
     raise AvmServiceBadRequestError.new(response.body) if response.status >= 400
   end
 end
