@@ -37,12 +37,12 @@ class Document < ApplicationRecord
     avm_service.validate_parameters(self, content, mimetype)
   end
 
-  def validate_signatures
+  def signature_validation
     avm_service.validate self
   end
 
   def signers
-    response = validate_signatures
+    response = signature_validation
 
     return [] if !response['signedObjects'] || response['signedObjects'].size != 1 || (response['unsignedObjects'] && response['unsignedObjects'].size != 0)
     object_id = response['signedObjects'][0]['id']

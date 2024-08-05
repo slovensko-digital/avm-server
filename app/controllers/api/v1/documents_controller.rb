@@ -43,7 +43,7 @@ class Api::V1::DocumentsController < ApplicationController
 
   # GET /documents/1/validation
   def validation
-    @validation = @document.validate_signatures
+    @validation = @document.signature_validation
   end
 
   # POST /documents/1/datatosign
