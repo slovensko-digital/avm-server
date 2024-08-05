@@ -136,10 +136,6 @@ class Api::V1::DocumentsController < ApplicationController
       )
     end
 
-    def should_auto_load(params)
-      (!params[:parameters][:containerXmlns]) or params[:parameters][:embedUsedSchemas]
-    end
-
     def datatosign_params
       params.permit(:encryption_key, :id, :signing_certificate, :add_timestamp)
     end
