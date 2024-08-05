@@ -357,8 +357,8 @@ paths:
         404:
           description: Not found
 
-  /documents/{guid}/validation:
-    get:
+  /documents/{guid}/validate:
+    post:
       tags:
         - Mobile2App
       security:
