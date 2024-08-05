@@ -16,6 +16,16 @@ class AvmApi
     handle_response(response)
   end
 
+  def validate(document)
+    response = Faraday.post(url('/validate'), {
+        content: document.decrypted_content
+    }.to_json)
+
+    handle_response(response)
+
+    JSON.parse(response.body)
+  end
+
   def visualization(document)
     response = Faraday.post(url('/visualization'), {
       document: {

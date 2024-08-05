@@ -1,7 +1,7 @@
 class Api::V1::DocumentsController < ApplicationController
-  before_action :set_document, only: %i[ show datatosign sign visualization destroy parameters ]
-  before_action :set_key, only: %i[ create datatosign sign visualization ]
-  before_action :decrypt_document_content, only: %i[ sign datatosign visualization destroy]
+  before_action :set_document, only: %i[ show datatosign sign visualization destroy parameters validation ]
+  before_action :set_key, only: %i[ create datatosign sign visualization validation ]
+  before_action :decrypt_document_content, only: %i[ sign datatosign visualization destroy validation]
 
   # GET /documents/1
   def show
@@ -39,6 +39,11 @@ class Api::V1::DocumentsController < ApplicationController
   # POST /documents/1/visualization
   def visualization
     @visualization = @document.visualization
+  end
+
+  # GET /documents/1/validation
+  def validation
+    @validation = @document.validate_signatures
   end
 
   # POST /documents/1/datatosign
@@ -97,9 +102,9 @@ class Api::V1::DocumentsController < ApplicationController
     end
 
     def document_params
-      params.require(:parameters)
       params.require(:document).require(:content)
 
+      params[:parameters] = {} unless params[:parameters]
       params[:parameters][:autoLoadEform] = true unless params[:parameters][:containerXmlns]
 
       params.permit(
@@ -161,7 +166,7 @@ class Api::V1::DocumentsController < ApplicationController
       unless filename
         filename = 'document.' + Mime::Type.lookup(mimetype).symbol.to_s
       else
-        mimetype = Mime::Type.lookup_by_extension(File.extname(filename).downcase.gsub('.', '')).to_s
+        mimetype = Mime::Type.lookup_by_extension(File.extname(filename).downcase.gsub('.', '')).to_s + ';base64'
         raise AvmServiceBadRequestError.new({code: "FAILED_PARSING_MIMETYPE", message: "Could not parse mimetype", details: "Could not parse mimetype from: #{filename}"}.to_json) if mimetype.empty?
       end
 
