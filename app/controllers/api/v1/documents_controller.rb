@@ -41,7 +41,7 @@ class Api::V1::DocumentsController < ApplicationController
     @visualization = @document.visualization
   end
 
-  # POST /documents/1/validate
+  # GET /documents/1/validate
   def validate
     @validation = @document.signature_validation
   end

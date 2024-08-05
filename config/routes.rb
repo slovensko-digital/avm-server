@@ -10,7 +10,7 @@ Rails.application.routes.draw do
           post 'datatosign'
           post 'sign'
           get 'parameters'
-          post 'validate'
+          get 'validate'
         end
       end
 

@@ -358,7 +358,7 @@ paths:
           description: Not found
 
   /documents/{guid}/validate:
-    post:
+    get:
       tags:
         - Mobile2App
       security:
