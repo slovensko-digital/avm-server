@@ -105,7 +105,7 @@ class Api::V1::DocumentsController < ApplicationController
       params.require(:document).require(:content)
 
       params[:parameters] = {} unless params[:parameters]
-      params[:parameters][:autoLoadEform] = true unless params[:parameters][:containerXmlns]
+      params[:parameters][:autoLoadEform] = true unless params[:schema] && params[:transformation]
 
       params.permit(
         :encryption_key,
@@ -134,6 +134,10 @@ class Api::V1::DocumentsController < ApplicationController
           :transformationTargetEnvironment
         ]
       )
+    end
+
+    def should_auto_load(params)
+      (!params[:parameters][:containerXmlns]) or params[:parameters][:embedUsedSchemas]
     end
 
     def datatosign_params
