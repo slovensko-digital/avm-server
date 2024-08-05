@@ -1,7 +1,7 @@
 class Api::V1::DocumentsController < ApplicationController
-  before_action :set_document, only: %i[ show datatosign sign visualization destroy parameters validation ]
-  before_action :set_key, only: %i[ create datatosign sign visualization validation ]
-  before_action :decrypt_document_content, only: %i[ sign datatosign visualization destroy validation]
+  before_action :set_document, only: %i[ show datatosign sign visualization destroy parameters validate ]
+  before_action :set_key, only: %i[ create datatosign sign visualization validate ]
+  before_action :decrypt_document_content, only: %i[ sign datatosign visualization destroy validate]
 
   # GET /documents/1
   def show

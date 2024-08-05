@@ -42,16 +42,15 @@ class Document < ApplicationRecord
   end
 
   def signers
-    response = signature_validation
-
-    return [] if !response['signedObjects'] || response['signedObjects'].size != 1 || (response['unsignedObjects'] && response['unsignedObjects'].size != 0)
-    object_id = response['signedObjects'][0]['id']
-
-    response['signatures'].select{ |s| s['signedObjectsIds'].include? object_id }.map do |signature|
-      {
-        signedBy: signature['signingCertificate']['subjectDN'],
-        issuedBy: signature['signingCertificate']['issuerDN']
-      }
+    begin
+      signature_validation['signatures'].map do |signature|
+        {
+          signedBy: signature['signingCertificate']['subjectDN'],
+          issuedBy: signature['signingCertificate']['issuerDN']
+        }
+      end
+    rescue AvmServiceDocumentNotSignedError
+      []
     end
   end
 

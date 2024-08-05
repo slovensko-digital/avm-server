@@ -13,7 +13,7 @@ class ApplicationController < ActionController::API
     render json: JSON.parse(e.message), status: 409
   end
 
-  rescue_from AvmServiceBadRequestError do |e|
+  rescue_from AvmServiceBadRequestError, AvmServiceDocumentNotSignedError do |e|
     render json: JSON.parse(e.message), status: 422
   end
 
