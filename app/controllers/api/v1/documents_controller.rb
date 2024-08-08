@@ -105,7 +105,7 @@ class Api::V1::DocumentsController < ApplicationController
       params.require(:document).require(:content)
 
       params[:parameters] = {} unless params[:parameters]
-      params[:parameters][:autoLoadEform] = true unless params[:schema] && params[:transformation]
+      params[:parameters][:autoLoadEform] = true unless params[:parameters][:schema] && params[:parameters][:transformation]
 
       params.permit(
         :encryption_key,
