@@ -1537,7 +1537,7 @@ components:
           containerType: ASiC_E
           signatureForm: XAdES
           signatures:
-            validationResult: TOTAL_PASSED
+          - validationResult: TOTAL_PASSED
             level: XAdES_BASELINE_LTA
             claimedSigningTime: 2023-08-01T12:37:47 +0200
             bestSigningTime: 2023-08-01T12:37:47 +0200
