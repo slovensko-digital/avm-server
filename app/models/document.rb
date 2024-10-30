@@ -13,6 +13,11 @@ class Document < ApplicationRecord
     [mimetype + ';base64', Base64.strict_encode64(content), params]
   end
 
+  def reset_signature_level
+    return unless parameters['level']
+    parameters['level'] = parameters['level'].gsub(/XAdES_BASELINE_/, '').gsub(/CAdES_BASELINE_/, '')
+  end
+
   def decrypt_content(key)
     decryptor = ActiveSupport::MessageEncryptor.new(key)
     begin
