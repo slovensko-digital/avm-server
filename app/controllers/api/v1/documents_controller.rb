@@ -26,6 +26,7 @@ class Api::V1::DocumentsController < ApplicationController
     mimetype, content, parameters = Document.convert_to_b64(mimetype, p[:document][:content], p[:parameters])
 
     @document = Document.new(parameters: parameters)
+    @document.reset_signature_level if 'vnd.etsi.asic'.in?(mimetype)
     @document.encrypt_file(@key, filename, mimetype, content)
     @document.validate_parameters(content, mimetype)
 
