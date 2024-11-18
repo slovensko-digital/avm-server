@@ -17,6 +17,8 @@ Projekt sa skladá z viacerých častí:
 
 ## Ako si to rozbehnúť
 
+### Development prostredie
+
 - Je potrebné si nainštalovať správnu verziu Ruby. To sa najlepšie robí cez [RVM](https://rvm.io/) alebo [Rbenv](https://github.com/rbenv/rbenv).
 - Aplikácia vyžaduje PostgreSQL databázu.
 - Skopírovať `.env.sample` do `.env` a nastaviť hodnoty.
@@ -27,6 +29,17 @@ bundle install
 bundle exec rails db:setup
 bundle esec rails s
 ```
+
+### Produkčné nasadenie v kontajneri
+
+- Je potrebné si vybuildiť Docker image na základe poskytnutého Dockerfile.
+- Volume pre šifrované ukladanie podpisovaných súborov v `/app/storage`
+- Premenné prosredia sú bližšie popísané v `.env.sample`, pričom tieto sú nevyhnutné pre produkčné nasadenie:
+  - PostgreSQL a connection string v `DATABASE_URL`
+  - Adresa [AVM Service](https://github.com/slovensko-digital/avm-service) inštnacie v `AVM_MICROSERVICE_HOST`
+  - Nastavené ENVs `ACTIVE_RECORD_ENCRYPTION_*`
+  - Nastavený ENV `SECRET_KEY_BASE`
+  - Nastavený ENV `RAILS_ENV=production`
 
 
 ## Architektúra riešenia

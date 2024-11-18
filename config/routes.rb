@@ -20,11 +20,12 @@ Rails.application.routes.draw do
       resources :integration_devices, path: '/integration-devices', only: [:index, :destroy]
       resource :sign_request, path: '/sign-request', only: [:create]
 
-      get '/qr-code', to: redirect('https://sluzby.slovensko.digital/autogram-v-mobile/#download', status: 302)
+      get '/qr-code', to: redirect(ENV.fetch("QR_CODE_URL_REDIRECT", 'https://sluzby.slovensko.digital/autogram-v-mobile/#download'), status: 302)
     end
   end
 
-  get '/.well-known/apple-app-site-association' => 'apple#apple_app_site_association'
+  get '/.well-known/apple-app-site-association' => 'assetlinks#apple_app_site_association'
+  get '/.well-known/assetlinks.json' => 'assetlinks#android_assetlinks'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

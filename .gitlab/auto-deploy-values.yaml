@@ -34,10 +34,3 @@ persistence:
       accessMode: ReadWriteMany
       size: 1Gi
       storageClass: nfs-client
-  - name: autogram-server-well-known
-    mount:
-      path: /app/public/.well-known
-    claim:
-      accessMode: ReadWriteMany
-      size: 1Mi
-      storageClass: nfs-client
