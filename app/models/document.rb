@@ -76,12 +76,14 @@ class Document < ApplicationRecord
   def sign(key, data_to_sign, signed_data)
     response = avm_service.sign(self, data_to_sign, signed_data)
 
-    document = response['documentResponse']
-    encrypt_file(key, document.dig('filename'), document['mimeType'], document['content'])
+    encrypt_file(key, response.dig('filename'), response['mimeType'], response['content'])
     self.last_signed_at = Time.current
     save!
 
-    response['signer']
+    {
+      'signedBy': response['signedBy'],
+      'issuedBy': response['issuedBy']
+    }
   end
 
   private

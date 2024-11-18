@@ -62,7 +62,7 @@ class AvmApi
   end
 
   def sign(document, datatosign_structure, signed_data)
-    response = Faraday.post(url('/sign'), {
+    response = Faraday.post(url('/build-signature'), {
       "originalSignRequestBody": {
         document: {
           filename: document.encrypted_content.filename,
