@@ -65,7 +65,7 @@ class Document < ApplicationRecord
 
   def set_add_timestamp
     parameters['level'] = parameters['level'].gsub(/BASELINE_B/, 'BASELINE_T') if parameters['level']
-    parameters['level'] = 'T' unless parameters['level']
+    parameters['level'] = 'T' unless parameters['level'] && parameters['level'] != 'B'
     save!
   end
 
