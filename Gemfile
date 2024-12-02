@@ -53,4 +53,4 @@ group :development do
   # gem "spring"
 end
 
-gem "good_job", "~> 4.4"
+gem "good_job", "~> 4.5"
