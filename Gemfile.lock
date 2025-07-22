@@ -93,12 +93,12 @@ GEM
     erubi (1.13.0)
     et-orbi (1.2.11)
       tzinfo
-    faraday (2.12.0)
-      faraday-net_http (>= 2.0, < 3.4)
+    faraday (2.12.2)
+      faraday-net_http (>= 2.0, < 3.5)
       json
       logger
-    faraday-net_http (3.3.0)
-      net-http
+    faraday-net_http (3.4.0)
+      net-http (>= 0.5.0)
     fcm (2.0.1)
       faraday (>= 1.0.0, < 3.0)
       googleauth (~> 1)
@@ -132,10 +132,10 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
-    json (2.7.2)
+    json (2.9.0)
     jwt (2.9.3)
       base64
-    logger (1.6.1)
+    logger (1.6.3)
     loofah (2.22.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
@@ -150,7 +150,7 @@ GEM
     minitest (5.25.1)
     msgpack (1.7.3)
     multi_json (1.15.0)
-    net-http (0.4.1)
+    net-http (0.6.0)
       uri
     net-imap (0.5.0)
       date
@@ -239,7 +239,7 @@ GEM
     timeout (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    uri (0.13.1)
+    uri (1.0.2)
     useragent (0.16.10)
     webrick (1.8.2)
     websocket-driver (0.7.6)
