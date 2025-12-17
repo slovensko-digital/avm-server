@@ -116,6 +116,7 @@ class Api::V1::DocumentsController < ApplicationController
           :checkPDFACompliance,
           :autoLoadEform,
           :level,
+          :fsFormId,
           :container,
           :containerXmlns,
           :embedUsedSchemas,
