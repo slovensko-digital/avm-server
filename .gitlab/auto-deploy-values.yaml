@@ -21,9 +21,10 @@ readinessProbe:
   path: "/up"
 resources:
   requests:
+    cpu: 5m
     memory: 2Gi
   limits:
-    memory: 3Gi
+    memory: 2300Mi
 persistence:
   enabled: true
   volumes:
