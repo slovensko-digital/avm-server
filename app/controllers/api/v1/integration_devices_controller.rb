@@ -3,11 +3,12 @@ class Api::V1::IntegrationDevicesController < ApiController
 
   def index
     @devices = @integration.devices
+    render :index
   end
 
   def destroy
     @integration.devices.delete(Device.find(params.require(:id)))
-    render :head
+    head 204
   end
 
   private
