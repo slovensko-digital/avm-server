@@ -133,7 +133,8 @@ class Api::V1::DocumentsController < ApplicationController
           :transformationIdentifier,
           :transformationLanguage,
           :transformationMediaDestinationTypeDescription,
-          :transformationTargetEnvironment
+          :transformationTargetEnvironment,
+          { :visibleSignature => [ :fieldId, :text, { :image => [ :filename, :content, :mimeType ] } ] }
         ]
       )
     end
