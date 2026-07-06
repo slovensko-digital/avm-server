@@ -1,7 +1,6 @@
 class FcmNotifier
   def initialize
     @fcm = FCM.new(
-      ENV.fetch('FIREBASE_API_TOKEN', ''),
       StringIO.new(ENV.fetch('FIREBASE_CREDENTIALS')),
       ENV.fetch('FIREBASE_PROJECT_ID')
     )
