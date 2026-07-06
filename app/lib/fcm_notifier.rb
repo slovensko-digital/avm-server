@@ -1,7 +1,6 @@
 class FcmNotifier
   def initialize
     @fcm = FCM.new(
-      ENV.fetch('FIREBASE_API_TOKEN', ''),
       StringIO.new(ENV.fetch('FIREBASE_CREDENTIALS')),
       ENV.fetch('FIREBASE_PROJECT_ID')
     )
@@ -41,6 +40,6 @@ class FcmNotifier
     }
 
     # TODO: handle errors and implement exponential back-off
-    fcm.send_v1(message)
+    @fcm.send_v1(message)
   end
 end
