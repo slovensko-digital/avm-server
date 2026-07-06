@@ -16,6 +16,6 @@ module ApiEnvironment
   end
 
   def fcm_notifier
-    @fcm_notifier ||= FcmNotifer.new
+    @fcm_notifier ||= FcmNotifier.new
   end
 end
