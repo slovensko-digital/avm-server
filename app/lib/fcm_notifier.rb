@@ -41,6 +41,6 @@ class FcmNotifier
     }
 
     # TODO: handle errors and implement exponential back-off
-    fcm.send_v1(message)
+    @fcm.send_v1(message)
   end
 end
