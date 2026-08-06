@@ -1,1 +1,0 @@
-json.parameters @document.parameters
