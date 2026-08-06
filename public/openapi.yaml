@@ -320,7 +320,7 @@ paths:
       security:
         - Header: [ ]
         - Parameter: [ ]
-      summary: Client app gets the signature parameters of the doucment
+      summary: Client app gets the signature parameters of the document
       parameters:
         - name: guid
           in: path
@@ -817,7 +817,7 @@ components:
           description: GUID of the document to sign
         documentEncryptionKey:
           type: string
-          description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing doucment.
+          description: AES256 encryption key in hexadecimal form (64 characters) that is used to encrypt and decrypt signing document.
           example: EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ=
       required:
         - documentGuid
@@ -1737,7 +1737,7 @@ components:
       in: header
       name: X-Encryption-Key
       description: |
-        AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing doucment.
+        AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing document.
 
         Example: `EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ=`
 
@@ -1746,7 +1746,7 @@ components:
       in: query
       name: encryptionKey
       description: |
-        AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing doucment.
+        AES256 encryption key in Base64 form (44 base64 characters == 32 bytes) that is used to encrypt and decrypt signing document.
 
         Example: `EeESAfZQh9OTf5qZhHZtgaDJpYtxZD6TIOQJzRgRFgQ=`
 

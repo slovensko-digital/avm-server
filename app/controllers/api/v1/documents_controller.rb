@@ -70,6 +70,7 @@ class Api::V1::DocumentsController < ApplicationController
 
   # GET /documents/1/parameters
   def parameters
+    render json: @document.parameters
   end
 
   private
