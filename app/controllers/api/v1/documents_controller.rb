@@ -1,7 +1,7 @@
 class Api::V1::DocumentsController < ApplicationController
   before_action :set_document, only: %i[ show datatosign sign visualization destroy parameters validate ]
   before_action :set_key, only: %i[ create datatosign sign visualization validate ]
-  before_action :decrypt_document_content, only: %i[ sign datatosign visualization destroy validate]
+  before_action :decrypt_document_content, only: %i[ sign datatosign visualization validate]
 
   # GET /documents/1
   def show
@@ -87,7 +87,7 @@ class Api::V1::DocumentsController < ApplicationController
         rescue ArgumentError
           @key = Base64.strict_decode64(key_b64)
         end
-      rescue => e
+      rescue
         raise AvmUnauthorizedError.new("ENCRYPTION_KEY_MALFORMED", "Encryption key Base64 decryption failed.", "Encryption key must be a base64 string encoding 32 bytes long key, but was: \"#{key_b64}\"")
       end
 
