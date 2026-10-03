@@ -7,7 +7,7 @@ class Api::V1::IntegrationDevicesController < ApiController
 
   def destroy
     @integration.devices.delete(Device.find(params.require(:id)))
-    render :head
+    head 204
   end
 
   private

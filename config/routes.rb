@@ -21,6 +21,7 @@ Rails.application.routes.draw do
       resource :sign_request, path: '/sign-request', only: [:create]
 
       get '/qr-code', to: redirect(ENV.fetch("QR_CODE_URL_REDIRECT", 'https://sluzby.slovensko.digital/autogram-v-mobile/#download'), status: 302)
+      get '/qr-code-register', to: redirect(ENV.fetch("QR_CODE_URL_REDIRECT", 'https://sluzby.slovensko.digital/autogram-v-mobile/#download'), status: 302)
     end
   end
 
