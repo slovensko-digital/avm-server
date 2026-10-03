@@ -806,6 +806,27 @@ paths:
         302:
           description: Redirect to app download page. The QR code / url should be open through Autogram v mobile app and parameters should be parsed and used for document signing or integration pairing.
 
+  /qr-code-register:
+    get:
+      tags:
+        - QR code
+      summary: URL format for pairing Autogram v mobile app with an integration
+      description: |
+        This QR code / URL pairs Autogram v mobile application with an integration, so the integration can send sign requests (push notifications) to the device later. Unlike `/qr-code`, it doesn't contain any document.
+
+        Example: `https://autogram.slovensko.digital/api/v1/qr-code-register?integration=eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiI3OGQ5MWRlNy0xY2MyLTQwZTQtOWE3MS0zODU4YjRmMDMxOWQiLCJleHAiOjE3MTI5MDk3MjAsImp0aSI6IjAwZTAxN2Y1LTI4MTAtNDkyNS04ODRlLWNiN2FhZDAzZDFhNiIsImF1ZCI6ImRldmljZSJ9.7Op6W2BvbX2_mgj9dkz1IiolEsQ1Z2a0AzpS5bj4pcG3CJ4Z8j9W3RQE95wrAj3t6nmd9JaGZSlCJNSV_myyLQ`
+      parameters:
+        - name: integration
+          in: query
+          schema:
+            type: string
+          description: 'JWT of source integration used to pair device with the integration. Must contain `aud: "device"` claim'
+          example: eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiI3OGQ5MWRlNy0xY2MyLTQwZTQtOWE3MS0zODU4YjRmMDMxOWQiLCJleHAiOjE3MTI5MDk3MjAsImp0aSI6IjAwZTAxN2Y1LTI4MTAtNDkyNS04ODRlLWNiN2FhZDAzZDFhNiIsImF1ZCI6ImRldmljZSJ9.7Op6W2BvbX2_mgj9dkz1IiolEsQ1Z2a0AzpS5bj4pcG3CJ4Z8j9W3RQE95wrAj3t6nmd9JaGZSlCJNSV_myyLQ
+          required: true
+      responses:
+        302:
+          description: Redirect to app download page. The QR code / url should be open through Autogram v mobile app and used for integration pairing.
+
 components:
   schemas:
     PostSignRequestBody:
