@@ -114,3 +114,14 @@ V prípade, že má používateľ nainštalované rozšírenie `Autogram na št�
 
 
 
+
+
+### Overiteľná vizualizácia - klient nemusí veriť serveru
+
+Pri `GET /api/v1/documents/<guid>/visualization` server dokument vyrenderuje (napr. XSLT transformáciou formulára) a klient musí veriť, že `dataToSign` z `POST /datatosign` naozaj patrí k zobrazenému dokumentu. Endpoint `GET /api/v1/documents/<guid>/verifiable-visualization` namiesto toho vracia samotné dátové objekty, ktoré pokryje podpis. Klient si dokument zobrazí sám a pred podpisom overí, že `dataToSign` zodpovedá zobrazenému dokumentu (a v prípade lokálneho súboru aj tomu, čo používateľ vybral). Vďaka tomu je bezpečné podpisovať aj dokumenty zo serverov, ktoré klient nekontroluje.
+
+- **XAdES (ASiC kontajner)** - `document` je podpisovaný súbor. `dataToSign` je kanonikalizovaný `ds:SignedInfo`, ktorého `ds:Reference` obsahuje hash dokumentu. Ak je dokument XML Datacontainer s referencovanou XSLT, `transformation` obsahuje XSLT kanonikalizovanú podľa `TransformAlgorithm`, takže jej hash sa dá porovnať s `DigestValue` v XML Datacontaineri. XSLT transformáciu `xdc:XMLData` robí klient.
+- **CAdES** - `document` je podpisovaný súbor. `dataToSign` sú DER podpísané atribúty s `message-digest` hashom `asicManifest` (ASiC-E), ktorý obsahuje hash dokumentu, alebo priamo hashom dokumentu (bez kontajnera).
+- **PAdES** - `document` je PDF už pripravené na podpis (s podpisovým slovníkom a miestom pre podpis) a `pdfByteRange` je jeho `/ByteRange`. `dataToSign` sú DER podpísané atribúty s `message-digest` hashom bajtov z `/ByteRange`. PDF je pripravené s časom podpisu `signingTime`, ktorý musí klient poslať v `POST /datatosign`, inak by sa podpisovalo iné PDF.
+
+XAdES podpis bez ASiC kontajnera overiteľná vizualizácia nepodporuje.

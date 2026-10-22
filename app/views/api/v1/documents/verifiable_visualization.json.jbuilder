@@ -1,0 +1,6 @@
+json.signatureForm @visualization['signatureForm']
+json.document @visualization['document']
+json.transformation @visualization['transformation'] if @visualization['transformation']
+json.asicManifest @visualization['asicManifest'] if @visualization['asicManifest']
+json.pdfByteRange @visualization['pdfByteRange'] if @visualization['pdfByteRange']
+json.signingTime @visualization['signingTime'] if @visualization['signingTime']
