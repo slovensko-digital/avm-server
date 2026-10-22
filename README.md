@@ -125,3 +125,5 @@ Pri `GET /api/v1/documents/<guid>/visualization` server dokument vyrenderuje (na
 - **PAdES** - `document` je PDF už pripravené na podpis (s podpisovým slovníkom a miestom pre podpis) a `pdfByteRange` je jeho `/ByteRange`. `dataToSign` sú DER podpísané atribúty s `message-digest` hashom bajtov z `/ByteRange`. PDF je pripravené s časom podpisu `signingTime`, ktorý musí klient poslať v `POST /datatosign`, inak by sa podpisovalo iné PDF.
 
 XAdES podpis bez ASiC kontajnera overiteľná vizualizácia nepodporuje.
+
+Aplikácia Autogram v mobile zatiaľ zobrazuje na zariadení iba PDF, textové súbory (UTF-8) a obrázky PNG a JPEG. Ostatné dokumenty, napr. formuláre, zobrazuje cez `GET /api/v1/documents/<guid>/visualization` iba z oficiálneho servera `autogram.slovensko.digital`. Z iného servera (link `https://<server-hostname>/api/v1/qr-code?guid=<guid>&key=<encryptionKey>`) je teda možné podpísať iba PDF, textové súbory a obrázky. Párovanie s integráciami (`/qr-code-register` a push notifikácie) funguje iba s oficiálnym serverom.
