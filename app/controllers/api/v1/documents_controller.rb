@@ -1,7 +1,7 @@
 class Api::V1::DocumentsController < ApplicationController
-  before_action :set_document, only: %i[ show datatosign sign visualization destroy parameters validate ]
-  before_action :set_key, only: %i[ create datatosign sign visualization destroy validate ]
-  before_action :decrypt_document_content, only: %i[ sign datatosign visualization destroy validate]
+  before_action :set_document, only: %i[ show datatosign sign visualization verifiable_visualization destroy parameters validate ]
+  before_action :set_key, only: %i[ create datatosign sign visualization verifiable_visualization destroy validate ]
+  before_action :decrypt_document_content, only: %i[ sign datatosign visualization verifiable_visualization destroy validate]
 
   # GET /documents/1
   def show
@@ -42,6 +42,11 @@ class Api::V1::DocumentsController < ApplicationController
     @visualization = @document.visualization
   end
 
+  # GET /documents/1/verifiable-visualization
+  def verifiable_visualization
+    @visualization = @document.verifiable_visualization
+  end
+
   # GET /documents/1/validate
   def validate
     render json: @document.signature_validation
@@ -49,9 +54,10 @@ class Api::V1::DocumentsController < ApplicationController
 
   # POST /documents/1/datatosign
   def datatosign
+    signing_time = datatosign_signing_time
     @document.set_add_timestamp if datatosign_params[:add_timestamp]
     @signing_certificate = datatosign_params.require(:signing_certificate)
-    @result = @document.datatosign(@signing_certificate)
+    @result = @document.datatosign(@signing_certificate, signing_time)
   end
 
   # POST /documents/1/sign
@@ -141,7 +147,20 @@ class Api::V1::DocumentsController < ApplicationController
     end
 
     def datatosign_params
-      params.permit(:encryption_key, :id, :signing_certificate, :add_timestamp)
+      params.permit(:encryption_key, :id, :signing_certificate, :add_timestamp, :signing_time)
+    end
+
+    # Signing time returned by verifiable visualization of PAdES signature, so the signed PDF is the visualized one
+    def datatosign_signing_time
+      signing_time = datatosign_params[:signing_time]
+      return nil if signing_time.nil?
+
+      signing_time = Integer(signing_time.to_s, exception: false)
+      unless signing_time && Time.at(signing_time / 1000.0).between?(@document.created_at - 5.minutes, Time.current + 5.minutes)
+        raise AvmServiceBadRequestError.new({code: "INVALID_SIGNING_TIME", message: "Invalid signing time", details: "Signing time must be epoch timestamp in milliseconds between document creation and now."}.to_json)
+      end
+
+      signing_time
     end
 
     def sign_params

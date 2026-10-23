@@ -63,14 +63,18 @@ class Document < ApplicationRecord
     avm_service.visualization(self)
   end
 
+  def verifiable_visualization
+    avm_service.verifiable_visualization(self)
+  end
+
   def set_add_timestamp
     parameters['level'] = parameters['level'].gsub(/BASELINE_B/, 'BASELINE_T') if parameters['level']
     parameters['level'] = 'T' unless parameters['level'] && parameters['level'] != 'B'
     save!
   end
 
-  def datatosign(signing_certificate)
-    avm_service.datatosign(self, signing_certificate)
+  def datatosign(signing_certificate, signing_time = nil)
+    avm_service.datatosign(self, signing_certificate, signing_time)
   end
 
   def sign(key, data_to_sign, signed_data)
