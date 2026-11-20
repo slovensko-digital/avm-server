@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       resources :documents, only: [:show, :create, :destroy] do
         member do
           get 'visualization'
+          get 'verifiable-visualization', action: :verifiable_visualization
           post 'datatosign'
           post 'sign'
           get 'parameters'

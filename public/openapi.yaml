@@ -2,7 +2,7 @@ openapi: '3.0.2'
 
 info:
   title: AVM Server
-  version: '0.4.0'
+  version: '0.5.0'
 
 servers:
   - url: https://autogram.slovensko.digital/api/v1
@@ -296,6 +296,83 @@ paths:
           description: Not found
         422:
           description: Unprocessable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseBody"
+        500:
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalErrorResponseBody"
+        502:
+          description: Bad gateway - internal error on AVM microservice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadGatewayErrorResponseBody"
+
+  /documents/{guid}/verifiable-visualization:
+    get:
+      tags:
+        - Desktop2App - Client
+        - Mobile2App
+      security:
+        - Header: [ ]
+        - Parameter: [ ]
+      summary: Client app requests data objects covered by the signature to visualize and verify the document by itself.
+      description: |
+        Unlike `/visualization`, server does not render the document. It returns the data objects which will be covered by the signature, so client can visualize the document by itself and verify, that DataToSign returned later from `/datatosign` corresponds to the visualized document. The client doesn't have to trust the server, that the signed document is the visualized one.
+
+        - **XAdES** (in ASiC container): `document` is the signed document. DataToSign is the canonicalized `ds:SignedInfo`, which references the document by its filename and digest. If the document is XML Datacontainer referencing its presentation schema, `transformation` contains the XSLT canonicalized by the `TransformAlgorithm` of the reference, so its digest can be compared to the `DigestValue` in the XML Datacontainer. Client applies the XSLT on `xdc:XMLData` to visualize the form.
+        - **CAdES**: `document` is the signed document. DataToSign are DER encoded signed attributes with message-digest of the `asicManifest` (ASiC-E container), which contains the digest of the document, or with message-digest of the document itself (without container).
+        - **PAdES**: `document` is the PDF prepared for signing - with signature dictionary and empty space for the signature. DataToSign are DER encoded signed attributes with message-digest of the `pdfByteRange` of the prepared PDF. The PDF was prepared with `signingTime`, which has to be sent in the following `/datatosign` request.
+
+        XAdES signatures without ASiC container are not supported (`422` with code `VERIFIABLE_VISUALIZATION_NOT_SUPPORTED`).
+      parameters:
+        - name: guid
+          in: path
+          schema:
+            type: string
+          required: true
+          example: bfde97b4-ee27-47bc-97e2-5164ed96a92a
+        - name: Accept
+          in: header
+          schema:
+            type: string
+            default: application/json
+          required: true
+          allowEmptyValue: false
+      responses:
+        200:
+          description: OK
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/VerifiableVisualizationResponseBody"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponseBody"
+        401:
+          description: EncryptionKey not provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyNotProvidedErrorResponseBody"
+        403:
+          description: EncryptionKey mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncryptionKeyMismatchErrorResponseBody"
+        404:
+          description: Not found
+        422:
+          description: Unprocessable content or verifiable visualization is not supported for the signature type
           content:
             application/json:
               schema:
@@ -1010,6 +1087,11 @@ components:
           description: Indication whether to add a timestamp to the signature if it was not set at document creation time
           example: true
           default: false
+        signingTime:
+          type: integer
+          format: int64
+          description: Optional epoch timestamp in milliseconds of the signing time. Current time is used by default. For PAdES it has to be `signingTime` returned from `/verifiable-visualization`, otherwise DataToSign would digest different PDF than the visualized one. It must be between document creation and the current time.
+          example: 1707900119123
       required:
         - signingCertificate
 
@@ -1329,6 +1411,76 @@ components:
           example: ZXhhbXBsZSBzdHJpbmcgaW4gYmFzZTY0Cg==
       required:
         - mimeType
+        - content
+
+    VerifiableVisualizationResponseBody:
+      type: object
+      properties:
+        signatureForm:
+          type: string
+          enum:
+            - XAdES
+            - CAdES
+            - PAdES
+          description: Form of the signature that will be created, determines how DataToSign references the document.
+          example: XAdES
+        document:
+          $ref: "#/components/schemas/SignedDataObject"
+        transformation:
+          $ref: "#/components/schemas/VerifiableVisualizationTransformation"
+        asicManifest:
+          $ref: "#/components/schemas/SignedDataObject"
+        pdfByteRange:
+          type: array
+          description: Only for PAdES. /ByteRange of the signature in the PDF prepared for signing - [offset1, length1, offset2, length2].
+          items:
+            type: integer
+            format: int64
+          example: [0, 11834, 49724, 894]
+        signingTime:
+          type: integer
+          format: int64
+          description: Only for PAdES. Epoch timestamp in milliseconds of the signing time used to prepare the PDF. It has to be sent in `/datatosign` request.
+          example: 1707900119123
+      required:
+        - signatureForm
+        - document
+
+    SignedDataObject:
+      type: object
+      description: Signed data object - document referenced from the signature, ASiC manifest, or PDF prepared for PAdES signature.
+      properties:
+        filename:
+          type: string
+          description: Name of the data object, it is the URI of the data object in ASiC container
+          example: sample_document.pdf
+        mimeType:
+          type: string
+          example: "application/pdf;base64"
+        content:
+          type: string
+          description: Base64 encoded content of the data object
+          example: ZXhhbXBsZSBzdHJpbmcgaW4gYmFzZTY0Cg==
+      required:
+        - mimeType
+        - content
+
+    VerifiableVisualizationTransformation:
+      type: object
+      description: Only for XML Datacontainer referencing its presentation schema. XSLT transformation to visualize `xdc:XMLData` of the document.
+      properties:
+        content:
+          type: string
+          description: Base64 encoded XSLT canonicalized by the `TransformAlgorithm` of `xdc:UsedPresentationSchemaReference`, so its digest is the `DigestValue` there.
+          example: PHhzbDpzdHlsZXNoZWV0IHZlcnNpb249IjEuMCI+PC94c2w6c3R5bGVzaGVldD4=
+        mediaDestinationTypeDescription:
+          type: string
+          enum:
+            - TXT
+            - HTML
+            - XHTML
+          example: HTML
+      required:
         - content
 
     DocumentValidationResponseBody:

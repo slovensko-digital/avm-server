@@ -43,7 +43,22 @@ class AvmApi
     r
   end
 
-  def datatosign(document, signing_certificate)
+  def verifiable_visualization(document)
+    response = Faraday.post(url('/verifiable-visualization'), {
+      document: {
+        filename: document.encrypted_content.filename,
+        content: document.decrypted_content
+      },
+      parameters: document.parameters,
+      payloadMimeType: document.decrypted_content_mimetype_b64
+    }.to_json)
+
+    handle_response(response)
+
+    JSON.parse(response.body)
+  end
+
+  def datatosign(document, signing_certificate, signing_time = nil)
     response = Faraday.post(url('/datatosign'), {
       "originalSignRequestBody": {
         document: {
@@ -53,8 +68,9 @@ class AvmApi
         parameters: document.parameters,
         payloadMimeType: document.decrypted_content_mimetype_b64
       },
-      "signingCertificate": signing_certificate
-    }.to_json)
+      "signingCertificate": signing_certificate,
+      "signingTime": signing_time
+    }.compact.to_json)
 
     handle_response(response)
 
